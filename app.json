@@ -1,0 +1,27 @@
+{
+  "expo": {
+    "name": "StudyApp",
+    "slug": "study-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.studyapp.mobile"
+    },
+    "web": {},
+    "plugins": [
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "e58cbb32-8eea-4e99-88c8-4a46d2f8d39e"
+      }
+    }
+  }
+}
