@@ -12,7 +12,6 @@ import {
   StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { summarizeText, generateQuiz } from '../services/aiService';
 import { useApp, ACTIONS } from '../context/AppContext';
 
 const COLORS = {
@@ -41,62 +40,12 @@ export default function TextbookReaderScreen({ route, navigation }) {
 
   const [fontSizeIndex, setFontSizeIndex] = useState(1);
   const [themeIndex, setThemeIndex] = useState(0);
-  const [showSettings, setShowSettings] = useState(false);
-  const [summary, setSummary] = useState('');
-  const [summaryVisible, setSummaryVisible] = useState(false);
-  const [isSummarizing, setIsSummarizing] = useState(false);
-  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
-  const [highlightedText, setHighlightedText] = useState('');
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const [noteText, setNoteText] = useState('');
 
   const theme = THEMES[themeIndex];
   const fontSize = FONT_SIZES[fontSizeIndex];
   const content = item.content || item.description || 'No content available for this item.';
-
-  const handleSummarize = async () => {
-    if (!item.content) {
-      Alert.alert('No Content', 'This item has no text content to summarize.');
-      return;
-    }
-    setIsSummarizing(true);
-    setSummaryVisible(true);
-    setSummary('');
-    try {
-      const result = await summarizeText(item.content, 'bullet-points');
-      setSummary(result.summary);
-    } catch (error) {
-      setSummary('Could not generate summary. Make sure the server is running.');
-    } finally {
-      setIsSummarizing(false);
-    }
-  };
-
-  const handleGenerateQuiz = async () => {
-    if (!item.content) {
-      Alert.alert('No Content', 'This item has no content to generate a quiz from.');
-      return;
-    }
-    setIsGeneratingQuiz(true);
-    try {
-      const result = await generateQuiz(item.title, 5, 'medium');
-      const saved = {
-        id: Date.now().toString(),
-        ...result,
-        createdAt: new Date().toISOString(),
-      };
-      dispatch({ type: ACTIONS.ADD_QUIZ, payload: saved });
-      Alert.alert(
-        'Quiz Generated!',
-        `A 5-question quiz on "${item.title}" has been saved. Find it in the Quiz tab under Saved.`,
-        [{ text: 'OK' }]
-      );
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Could not generate quiz.');
-    } finally {
-      setIsGeneratingQuiz(false);
-    }
-  };
 
   const handleSaveNote = () => {
     if (!noteText.trim()) return;
@@ -143,16 +92,6 @@ export default function TextbookReaderScreen({ route, navigation }) {
 
         {/* Center: actions */}
         <View style={styles.toolbarGroup}>
-          <TouchableOpacity style={styles.toolbarActionBtn} onPress={handleSummarize} disabled={isSummarizing}>
-            {isSummarizing
-              ? <ActivityIndicator size="small" color={COLORS.secondary} />
-              : <Ionicons name="sparkles" size={20} color={COLORS.secondary} />}
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.toolbarActionBtn} onPress={handleGenerateQuiz} disabled={isGeneratingQuiz}>
-            {isGeneratingQuiz
-              ? <ActivityIndicator size="small" color={COLORS.warning} />
-              : <Ionicons name="flash" size={20} color={COLORS.warning} />}
-          </TouchableOpacity>
           <TouchableOpacity style={styles.toolbarActionBtn} onPress={() => setNoteModalVisible(true)}>
             <Ionicons name="create" size={20} color={COLORS.success} />
           </TouchableOpacity>
@@ -170,34 +109,6 @@ export default function TextbookReaderScreen({ route, navigation }) {
           />
         </TouchableOpacity>
       </View>
-
-      {/* Toolbar legend */}
-      <View style={[styles.legend, { backgroundColor: theme.bg }]}>
-        <LegendItem icon="sparkles" color={COLORS.secondary} label="Summarize" />
-        <LegendItem icon="flash" color={COLORS.warning} label="Make Quiz" />
-        <LegendItem icon="create" color={COLORS.success} label="Add Note" />
-      </View>
-
-      {/* Summary panel */}
-      {summaryVisible && (
-        <View style={[styles.summaryPanel, { backgroundColor: COLORS.secondary + '12', borderColor: COLORS.secondary + '40' }]}>
-          <View style={styles.summaryPanelHeader}>
-            <Ionicons name="sparkles" size={15} color={COLORS.secondary} />
-            <Text style={[styles.summaryPanelTitle, { color: COLORS.secondary }]}>AI Summary</Text>
-            <TouchableOpacity onPress={() => setSummaryVisible(false)}>
-              <Ionicons name="close" size={18} color={COLORS.textLight} />
-            </TouchableOpacity>
-          </View>
-          {isSummarizing ? (
-            <View style={styles.summaryLoading}>
-              <ActivityIndicator color={COLORS.secondary} />
-              <Text style={styles.summaryLoadingText}>Summarizing…</Text>
-            </View>
-          ) : (
-            <Text style={[styles.summaryPanelText, { color: theme.text }]}>{summary}</Text>
-          )}
-        </View>
-      )}
 
       {/* Main content */}
       <ScrollView
