@@ -3,13 +3,17 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { ActivityIndicator, View } from 'react-native';
+
+import { useAuth } from '../context/AuthContext';
 
 // ── Screens ───────────────────────────────────────────────────────────────────
+import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import TextbookReaderScreen from '../screens/TextbookReaderScreen';
+import TodoScreen from '../screens/TodoScreen';
 
-// ── Theme ─────────────────────────────────────────────────────────────────────
 const COLORS = {
   primary: '#4A90E2',
   background: '#F8F9FA',
@@ -22,7 +26,12 @@ const COLORS = {
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// ── Stack navigators ──────────────────────────────────────────────────────────
+const stackScreenOptions = {
+  headerStyle: { backgroundColor: COLORS.primary },
+  headerTintColor: COLORS.white,
+  headerTitleStyle: { fontWeight: '700', fontSize: 18 },
+  contentStyle: { backgroundColor: COLORS.background },
+};
 
 function HomeStack() {
   return (
@@ -36,24 +45,19 @@ function LibraryStack() {
   return (
     <Stack.Navigator screenOptions={stackScreenOptions}>
       <Stack.Screen name="Library" component={LibraryScreen} options={{ title: 'Library' }} />
-      <Stack.Screen
-        name="TextbookReader"
-        component={TextbookReaderScreen}
-        options={{ title: 'Reader' }}
-      />
+      <Stack.Screen name="TextbookReader" component={TextbookReaderScreen} options={{ title: 'Reader' }} />
     </Stack.Navigator>
   );
 }
 
-// ── Shared stack screen options ───────────────────────────────────────────────
-const stackScreenOptions = {
-  headerStyle: { backgroundColor: COLORS.primary },
-  headerTintColor: COLORS.white,
-  headerTitleStyle: { fontWeight: '700', fontSize: 18 },
-  contentStyle: { backgroundColor: COLORS.background },
-};
+function TodoStack() {
+  return (
+    <Stack.Navigator screenOptions={stackScreenOptions}>
+      <Stack.Screen name="Todos" component={TodoScreen} options={{ title: 'My Tasks' }} />
+    </Stack.Navigator>
+  );
+}
 
-// ── Bottom Tab Navigator ──────────────────────────────────────────────────────
 function TabNavigator() {
   return (
     <Tab.Navigator
@@ -74,6 +78,7 @@ function TabNavigator() {
           const icons = {
             HomeTab: focused ? 'home' : 'home-outline',
             LibraryTab: focused ? 'library' : 'library-outline',
+            TodoTab: focused ? 'checkmark-circle' : 'checkmark-circle-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
         },
@@ -81,15 +86,38 @@ function TabNavigator() {
     >
       <Tab.Screen name="HomeTab" component={HomeStack} options={{ tabBarLabel: 'Home' }} />
       <Tab.Screen name="LibraryTab" component={LibraryStack} options={{ tabBarLabel: 'Library' }} />
+      <Tab.Screen name="TodoTab" component={TodoStack} options={{ tabBarLabel: 'Tasks' }} />
     </Tab.Navigator>
   );
 }
 
-// ── Root Navigator ────────────────────────────────────────────────────────────
+// ── Auth gate ─────────────────────────────────────────────────────────────────
+function AuthGate() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+      </Stack.Navigator>
+    );
+  }
+
+  return <TabNavigator />;
+}
+
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <TabNavigator />
+      <AuthGate />
     </NavigationContainer>
   );
 }
