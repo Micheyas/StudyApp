@@ -12,7 +12,8 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.studyapp.mobile"
+      "package": "com.studyapp.mobile",
+      "usesCleartextTraffic": true
     },
     "web": {},
     "plugins": [
