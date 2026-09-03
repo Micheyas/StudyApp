@@ -108,7 +108,7 @@ export default function AIAssistantScreen() {
   ]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [serverOnline, setServerOnline] = useState(null);
+  const [serverOnline, setServerOnline] = useState(true); // assume online, don't block user
   const [contextModalVisible, setContextModalVisible] = useState(false);
   const [selectedContext, setSelectedContext] = useState(null); // library item or note
 
@@ -125,14 +125,6 @@ export default function AIAssistantScreen() {
   const handleSend = async (text = inputText) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
-
-    if (serverOnline === false) {
-      Alert.alert(
-        'Server Offline',
-        'The AI server is not running. Start it with:\n\ncd study-app/server && npm install && node index.js\n\nThen add your ANTHROPIC_API_KEY to study-app/server/.env'
-      );
-      return;
-    }
 
     const userMessage = {
       id: Date.now().toString(),

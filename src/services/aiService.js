@@ -41,7 +41,13 @@ async function apiFetch(path, options = {}) {
 export async function checkServerHealth() {
   try {
     const baseUrl = await getServerUrl();
-    const response = await fetch(`${baseUrl}/health`, { method: 'GET' });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const response = await fetch(`${baseUrl}/health`, { 
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
     return response.ok;
   } catch {
     return false;
