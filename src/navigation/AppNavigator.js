@@ -7,12 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 // ── Screens ───────────────────────────────────────────────────────────────────
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
-import NotesScreen from '../screens/NotesScreen';
-import NoteEditorScreen from '../screens/NoteEditorScreen';
-import QuizScreen from '../screens/QuizScreen';
-import QuizResultScreen from '../screens/QuizResultScreen';
 import TextbookReaderScreen from '../screens/TextbookReaderScreen';
-import AIAssistantScreen from '../screens/AIAssistantScreen';
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 const COLORS = {
@@ -27,7 +22,7 @@ const COLORS = {
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// ── Stack navigators for each tab ─────────────────────────────────────────────
+// ── Stack navigators ──────────────────────────────────────────────────────────
 
 function HomeStack() {
   return (
@@ -45,46 +40,6 @@ function LibraryStack() {
         name="TextbookReader"
         component={TextbookReaderScreen}
         options={{ title: 'Reader' }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function NotesStack() {
-  return (
-    <Stack.Navigator screenOptions={stackScreenOptions}>
-      <Stack.Screen name="Notes" component={NotesScreen} options={{ title: 'My Notes' }} />
-      <Stack.Screen
-        name="NoteEditor"
-        component={NoteEditorScreen}
-        options={({ route }) => ({
-          title: route.params?.noteId ? 'Edit Note' : 'New Note',
-        })}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function QuizStack() {
-  return (
-    <Stack.Navigator screenOptions={stackScreenOptions}>
-      <Stack.Screen name="Quiz" component={QuizScreen} options={{ title: 'Quizzes' }} />
-      <Stack.Screen
-        name="QuizResult"
-        component={QuizResultScreen}
-        options={{ title: 'Results', headerBackVisible: false }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function AIStack() {
-  return (
-    <Stack.Navigator screenOptions={stackScreenOptions}>
-      <Stack.Screen
-        name="AIAssistant"
-        component={AIAssistantScreen}
-        options={{ title: 'AI Assistant' }}
       />
     </Stack.Navigator>
   );
@@ -119,9 +74,6 @@ function TabNavigator() {
           const icons = {
             HomeTab: focused ? 'home' : 'home-outline',
             LibraryTab: focused ? 'library' : 'library-outline',
-            NotesTab: focused ? 'document-text' : 'document-text-outline',
-            QuizTab: focused ? 'checkmark-circle' : 'checkmark-circle-outline',
-            AITab: focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
         },
@@ -129,9 +81,6 @@ function TabNavigator() {
     >
       <Tab.Screen name="HomeTab" component={HomeStack} options={{ tabBarLabel: 'Home' }} />
       <Tab.Screen name="LibraryTab" component={LibraryStack} options={{ tabBarLabel: 'Library' }} />
-      <Tab.Screen name="NotesTab" component={NotesStack} options={{ tabBarLabel: 'Notes' }} />
-      <Tab.Screen name="QuizTab" component={QuizStack} options={{ tabBarLabel: 'Quiz' }} />
-      <Tab.Screen name="AITab" component={AIStack} options={{ tabBarLabel: 'AI Help' }} />
     </Tab.Navigator>
   );
 }
