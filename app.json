@@ -12,10 +12,8 @@
     },
     "android": {
       "package": "com.studyapp.mobile",
-      "usesCleartextTraffic": true,
       "googleServicesFile": "./google-services.json",
       "permissions": [
-        "NOTIFICATIONS",
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "USE_EXACT_ALARM",
@@ -26,15 +24,12 @@
     "web": {},
     "plugins": [
       "expo-asset",
-      "expo-font",
       [
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
           "color": "#4A90E2",
-          "sounds": [],
-          "androidMode": "default",
-          "androidCollapsedTitle": "StudyApp"
+          "androidMode": "default"
         }
       ],
       "@react-native-google-signin/google-signin"
