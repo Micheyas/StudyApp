@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── Config ────────────────────────────────────────────────────────────────────
-const DEFAULT_SERVER_URL = 'http://10.186.102.207:3001';
+const DEFAULT_SERVER_URL = 'https://studyapp-ym4e.onrender.com';
 
 async function getServerUrl() {
   try {
