@@ -31,8 +31,7 @@
           "color": "#4A90E2",
           "androidMode": "default"
         }
-      ],
-      "@react-native-google-signin/google-signin"
+      ]
     ],
     "extra": {
       "eas": {

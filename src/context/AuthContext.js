@@ -1,13 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import { GoogleAuthProvider, signInWithCredential, signOut, onAuthStateChanged } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+} from 'firebase/auth';
 import { auth } from '../config/firebase';
-
-// Configure Google Sign-In
-GoogleSignin.configure({
-  webClientId: '1013108908488-540692qbbf0dgdnqd54nh03ocf8j7bar.apps.googleusercontent.com',
-  offlineAccess: true,
-});
 
 const AuthContext = createContext(null);
 
@@ -17,7 +16,6 @@ export function AuthProvider({ children }) {
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState(null);
 
-  // Listen to Firebase auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
@@ -26,25 +24,28 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
-  const signInWithGoogle = async () => {
+  const signIn = async (email, password) => {
     setSigningIn(true);
     setError(null);
     try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      const { idToken } = userInfo.data || userInfo;
-      const credential = GoogleAuthProvider.credential(idToken);
-      await signInWithCredential(auth, credential);
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (err) {
-      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled — not an error
-      } else if (err.code === statusCodes.IN_PROGRESS) {
-        setError('Sign in already in progress');
-      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        setError('Google Play Services not available');
-      } else {
-        setError(err.message || 'Sign in failed');
+      setError(getErrorMessage(err.code));
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const signUp = async (email, password, name) => {
+    setSigningIn(true);
+    setError(null);
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      if (name) {
+        await updateProfile(result.user, { displayName: name });
       }
+    } catch (err) {
+      setError(getErrorMessage(err.code));
     } finally {
       setSigningIn(false);
     }
@@ -52,18 +53,40 @@ export function AuthProvider({ children }) {
 
   const signOutUser = async () => {
     try {
-      await GoogleSignin.signOut();
       await signOut(auth);
     } catch (err) {
       console.error('Sign out error:', err);
     }
   };
 
+  const clearError = () => setError(null);
+
   return (
-    <AuthContext.Provider value={{ user, loading, signingIn, error, signInWithGoogle, signOutUser }}>
+    <AuthContext.Provider value={{ user, loading, signingIn, error, signIn, signUp, signOutUser, clearError }}>
       {children}
     </AuthContext.Provider>
   );
+}
+
+function getErrorMessage(code) {
+  switch (code) {
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Invalid email or password.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists.';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please try again later.';
+    case 'auth/network-request-failed':
+      return 'Network error. Check your internet connection.';
+    default:
+      return 'Something went wrong. Please try again.';
+  }
 }
 
 export function useAuth() {
