@@ -1,13 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-} from 'firebase/auth';
-import { auth } from '../config/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// ── Storage keys ──────────────────────────────────────────────────────────────
+const USERS_KEY = '@studyapp_users';
+const SESSION_KEY = '@studyapp_session';
+
+// ── Context ───────────────────────────────────────────────────────────────────
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -16,36 +14,114 @@ export function AuthProvider({ children }) {
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState(null);
 
+  // Restore session on mount
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      setLoading(false);
-    });
-    return unsubscribe;
+    async function restoreSession() {
+      try {
+        const session = await AsyncStorage.getItem(SESSION_KEY);
+        if (session) {
+          setUser(JSON.parse(session));
+        }
+      } catch (e) {
+        console.error('Session restore error:', e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    restoreSession();
   }, []);
 
-  const signIn = async (email, password) => {
-    setSigningIn(true);
-    setError(null);
+  // Get all users from storage
+  const getUsers = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      setError(getErrorMessage(err.code));
-    } finally {
-      setSigningIn(false);
+      const data = await AsyncStorage.getItem(USERS_KEY);
+      return data ? JSON.parse(data) : {};
+    } catch {
+      return {};
     }
+  };
+
+  // Save users to storage
+  const saveUsers = async (users) => {
+    await AsyncStorage.setItem(USERS_KEY, JSON.stringify(users));
+  };
+
+  // Simple hash for password (not cryptographic, but prevents plain text storage)
+  const hashPassword = (password) => {
+    let hash = 0;
+    for (let i = 0; i < password.length; i++) {
+      const char = password.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return hash.toString(36);
   };
 
   const signUp = async (email, password, name) => {
     setSigningIn(true);
     setError(null);
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      if (name) {
-        await updateProfile(result.user, { displayName: name });
+      if (!email.trim() || !password.trim()) {
+        setError('Email and password are required.');
+        return;
       }
-    } catch (err) {
-      setError(getErrorMessage(err.code));
+      if (password.length < 6) {
+        setError('Password must be at least 6 characters.');
+        return;
+      }
+
+      const users = await getUsers();
+      const emailKey = email.toLowerCase().trim();
+
+      if (users[emailKey]) {
+        setError('An account with this email already exists.');
+        return;
+      }
+
+      const newUser = {
+        uid: Date.now().toString(),
+        email: emailKey,
+        displayName: name || email.split('@')[0],
+        createdAt: new Date().toISOString(),
+        passwordHash: hashPassword(password),
+      };
+
+      users[emailKey] = newUser;
+      await saveUsers(users);
+
+      const sessionUser = { uid: newUser.uid, email: newUser.email, displayName: newUser.displayName };
+      await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+      setUser(sessionUser);
+    } catch (e) {
+      setError('Sign up failed. Please try again.');
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const signIn = async (email, password) => {
+    setSigningIn(true);
+    setError(null);
+    try {
+      if (!email.trim() || !password.trim()) {
+        setError('Email and password are required.');
+        return;
+      }
+
+      const users = await getUsers();
+      const emailKey = email.toLowerCase().trim();
+      const storedUser = users[emailKey];
+
+      if (!storedUser || storedUser.passwordHash !== hashPassword(password)) {
+        setError('Invalid email or password.');
+        return;
+      }
+
+      const sessionUser = { uid: storedUser.uid, email: storedUser.email, displayName: storedUser.displayName };
+      await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
+      setUser(sessionUser);
+    } catch (e) {
+      setError('Sign in failed. Please try again.');
     } finally {
       setSigningIn(false);
     }
@@ -53,9 +129,10 @@ export function AuthProvider({ children }) {
 
   const signOutUser = async () => {
     try {
-      await signOut(auth);
-    } catch (err) {
-      console.error('Sign out error:', err);
+      await AsyncStorage.removeItem(SESSION_KEY);
+      setUser(null);
+    } catch (e) {
+      console.error('Sign out error:', e);
     }
   };
 
@@ -66,27 +143,6 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-function getErrorMessage(code) {
-  switch (code) {
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
-      return 'Invalid email or password.';
-    case 'auth/email-already-in-use':
-      return 'An account with this email already exists.';
-    case 'auth/weak-password':
-      return 'Password must be at least 6 characters.';
-    case 'auth/invalid-email':
-      return 'Please enter a valid email address.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please try again later.';
-    case 'auth/network-request-failed':
-      return 'Network error. Check your internet connection.';
-    default:
-      return 'Something went wrong. Please try again.';
-  }
 }
 
 export function useAuth() {
