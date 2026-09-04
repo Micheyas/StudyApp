@@ -3,9 +3,12 @@
     "name": "StudyApp",
     "slug": "study-app",
     "version": "1.0.0",
+    "scheme": "study-app",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.studyapp.mobile"
@@ -31,7 +34,8 @@
           "color": "#4A90E2",
           "androidMode": "default"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

@@ -26,7 +26,7 @@ const COLORS = {
 };
 
 export default function LoginScreen() {
-  const { signIn, signUp, signingIn, error, clearError } = useAuth();
+  const { signIn, signUp, signingIn, error, clearError, signInWithGoogle, googleRequest } = useAuth();
   const [mode, setMode] = useState('login'); // 'login' | 'signup'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -150,6 +150,24 @@ export default function LoginScreen() {
               </Text>
             </Text>
           </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Google Sign In */}
+          <TouchableOpacity
+            style={[styles.googleBtn, (!googleRequest || signingIn) && styles.submitBtnDisabled]}
+            onPress={signInWithGoogle}
+            disabled={!googleRequest || signingIn}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="logo-google" size={20} color={COLORS.danger} />
+            <Text style={styles.googleBtnText}>Continue with Google</Text>
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
@@ -200,4 +218,13 @@ const styles = StyleSheet.create({
   switchBtn: { alignItems: 'center', marginTop: 16 },
   switchText: { fontSize: 14, color: COLORS.textLight },
   switchLink: { color: COLORS.primary, fontWeight: '700' },
+  divider: { flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 4 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.border },
+  dividerText: { fontSize: 13, color: COLORS.textLight, marginHorizontal: 12 },
+  googleBtn: {
+    flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10,
+    backgroundColor: COLORS.card, borderRadius: 14, padding: 14, marginTop: 10,
+    borderWidth: 1, borderColor: COLORS.border,
+  },
+  googleBtnText: { fontSize: 15, fontWeight: '700', color: COLORS.text },
 });
