@@ -29,8 +29,7 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   const redirectUri = AuthSession.makeRedirectUri({
-    scheme: 'study-app',
-    path: 'redirect',
+    useProxy: true,
   });
 
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
