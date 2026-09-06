@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp, ACTIONS } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+
+const ADMIN_EMAIL = 'mikiyasmelese336@gmail.com';
 
 const COLORS = {
   primary: '#4A90E2',
@@ -35,7 +38,7 @@ const CATEGORY_COLORS = {
   Other: COLORS.warning,
 };
 
-function LibraryItem({ item, onPress, onDelete }) {
+function LibraryItem({ item, onPress, onDelete, isAdmin }) {
   const color = CATEGORY_COLORS[item.category] || COLORS.textLight;
   return (
     <TouchableOpacity style={styles.itemCard} onPress={onPress} activeOpacity={0.8}>
@@ -54,9 +57,11 @@ function LibraryItem({ item, onPress, onDelete }) {
           <Text style={styles.itemDescription} numberOfLines={2}>{item.description}</Text>
         ) : null}
       </View>
-      <TouchableOpacity onPress={onDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-        <Ionicons name="trash-outline" size={18} color={COLORS.danger} />
-      </TouchableOpacity>
+      {isAdmin && (
+        <TouchableOpacity onPress={onDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Ionicons name="trash-outline" size={18} color={COLORS.danger} />
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 }
@@ -155,6 +160,8 @@ function AddItemModal({ visible, onClose, onAdd }) {
 
 export default function LibraryScreen({ navigation }) {
   const { state, dispatch } = useApp();
+  const { user } = useAuth();
+  const isAdmin = user?.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [modalVisible, setModalVisible] = useState(false);
@@ -223,6 +230,7 @@ export default function LibraryScreen({ navigation }) {
         renderItem={({ item }) => (
           <LibraryItem
             item={item}
+            isAdmin={isAdmin}
             onPress={() => navigation.navigate('TextbookReader', { item })}
             onDelete={() => handleDelete(item.id)}
           />
@@ -231,23 +239,27 @@ export default function LibraryScreen({ navigation }) {
           <View style={styles.emptyState}>
             <Ionicons name="library-outline" size={56} color={COLORS.border} />
             <Text style={styles.emptyTitle}>
-              {search || activeCategory !== 'All' ? 'No matches found' : 'Your library is empty'}
+              {search || activeCategory !== 'All' ? 'No matches found' : 'Library is empty'}
             </Text>
             <Text style={styles.emptyText}>
               {search || activeCategory !== 'All'
                 ? 'Try a different search or category'
-                : 'Tap + to add textbooks, articles, or study materials'}
+                : isAdmin ? 'Tap + to add study materials' : 'No study materials yet'}
             </Text>
           </View>
         }
       />
 
-      {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)} activeOpacity={0.85}>
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+      {/* FAB — admin only */}
+      {isAdmin && (
+        <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)} activeOpacity={0.85}>
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      )}
 
-      <AddItemModal visible={modalVisible} onClose={() => setModalVisible(false)} onAdd={handleAdd} />
+      {isAdmin && (
+        <AddItemModal visible={modalVisible} onClose={() => setModalVisible(false)} onAdd={handleAdd} />
+      )}
     </View>
   );
 }
