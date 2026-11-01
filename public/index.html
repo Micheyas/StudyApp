@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyApp - Study Portal</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Sidebar */
+    #sidebar {
+      width: 240px;
+      min-height: 100vh;
+      transition: transform 0.3s ease;
+    }
+    @media (max-width: 768px) {
+      #sidebar { position: fixed; top: 0; left: 0; z-index: 50; transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #main-content { margin-left: 0 !important; }
+    }
+
+    /* Active nav item */
+    .nav-item.active {
+      background: linear-gradient(135deg, #2563EB, #9333EA);
+      color: white;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+    .nav-item.active svg { color: white; }
+    .nav-item { transition: all 0.18s; }
+    .nav-item:not(.active):hover { background: #EFF6FF; color: #2563EB; }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #2563EB, #9333EA);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Hero gradient */
+    .hero-gradient {
+      background: linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 50%, #EDE9FE 100%);
+    }
+
+    /* Stat card gradients */
+    .stat-blue { background: linear-gradient(135deg, #2563EB, #1D4ED8); }
+    .stat-purple { background: linear-gradient(135deg, #9333EA, #7C3AED); }
+    .stat-indigo { background: linear-gradient(135deg, #4F46E5, #6366F1); }
+
+    /* Card hover */
+    .card-hover { transition: all 0.2s; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.12); }
+
+    /* Flashcard 3D flip */
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Overlay for mobile sidebar */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 40;
+    }
+    #sidebar-overlay.open { display: block; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 flex min-h-screen">
+
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR NAVIGATION
+  ════════════════════════════════════════════ -->
+  <aside id="sidebar" class="bg-white border-r border-gray-200 flex flex-col shadow-sm fixed top-0 left-0 h-full z-50 md:relative md:z-auto md:translate-x-0">
+    <!-- Brand -->
+    <div class="px-5 pt-6 pb-5 border-b border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg shadow-md" style="background: linear-gradient(135deg, #2563EB, #9333EA);">
+          📖
+        </div>
+        <div>
+          <h1 class="font-bold text-base text-gray-900 leading-tight">StudyApp</h1>
+          <span class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+            🔒 Read-Only
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="flex-1 px-3 py-4 space-y-1">
+      <button onclick="switchTab('dashboard')" id="tab-dashboard"
+        class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-left">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+      </button>
+
+      <button onclick="switchTab('library')" id="tab-library"
+        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-600 text-left">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        Library
+      </button>
+
+      <button onclick="switchTab('notes')" id="tab-notes"
+        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-600 text-left">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Notes
+      </button>
+
+      <button onclick="switchTab('quizzes')" id="tab-quizzes"
+        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-600 text-left">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+        </svg>
+        Quizzes
+      </button>
+    </nav>
+
+    <!-- Bottom: API Settings -->
+    <div class="px-3 pb-5 pt-2 border-t border-gray-100">
+      <button onclick="toggleApiSettings()"
+        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        API Settings
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT AREA
+  ════════════════════════════════════════════ -->
+  <div id="main-content" class="flex-1 flex flex-col min-h-screen" style="margin-left: 0;">
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30 px-6 h-16 flex items-center justify-between shadow-sm">
+      <!-- Mobile hamburger -->
+      <button onclick="openSidebar()" class="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition mr-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <!-- Page title (dynamic) -->
+      <div class="flex items-center gap-3">
+        <h2 id="page-title" class="text-base font-bold text-gray-900">Dashboard</h2>
+      </div>
+
+      <!-- Right: API url indicator -->
+      <div class="flex items-center gap-3">
+        <span id="footer-api-url" class="hidden sm:block text-xs text-gray-400"></span>
+        <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/60"></div>
+        <span class="text-xs font-medium text-emerald-600">Live</span>
+      </div>
+    </header>
+
+    <!-- ── API Settings Modal ── -->
+    <div id="api-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl border border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900 mb-1">Backend API Settings</h3>
+        <p class="text-sm text-gray-500 mb-5">
+          Enter the live URL of your backend when deployed on Vercel or Netlify.
+        </p>
+        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+          Backend API Base URL
+        </label>
+        <input
+          type="text"
+          id="api-base-input"
+          placeholder="http://localhost:3001"
+          class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-5"
+        />
+        <div class="flex justify-end gap-3">
+          <button onclick="toggleApiSettings()" class="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 transition">
+            Cancel
+          </button>
+          <button onclick="saveApiBase()" class="px-5 py-2 rounded-xl text-sm font-semibold text-white transition shadow-md" style="background: linear-gradient(135deg, #2563EB, #9333EA);">
+            Save &amp; Reload
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Note Detail Modal ── -->
+    <div id="note-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-2xl max-h-[85vh] rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+        <div class="flex items-start justify-between gap-4 border-b border-gray-100 p-6 pb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span id="note-modal-grade" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 border border-purple-200">Grade</span>
+              <span id="note-modal-subject" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Subject</span>
+            </div>
+            <h3 id="note-modal-title" class="text-xl font-bold text-gray-900 leading-snug">Note Title</h3>
+          </div>
+          <button onclick="closeNoteModal()" class="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition">
+            ✕
+          </button>
+        </div>
+        <div id="note-modal-content" class="text-sm text-gray-700 leading-relaxed overflow-y-auto p-6 pt-4 space-y-3 font-normal whitespace-pre-wrap flex-1">
+        </div>
+        <div class="flex justify-between items-center pt-4 border-t border-gray-100 px-6 pb-5">
+          <button onclick="copyNoteContent()" id="copy-note-btn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition flex items-center gap-1.5">
+            📋 Copy Note
+          </button>
+          <button onclick="closeNoteModal()" class="px-5 py-2 rounded-xl text-sm font-semibold text-white transition shadow-md" style="background: linear-gradient(135deg, #2563EB, #9333EA);">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main Scrollable Area ── -->
+    <main class="flex-1 overflow-y-auto px-4 sm:px-8 py-8">
+
+      <!-- Loading Indicator -->
+      <div id="loading" class="hidden py-20 flex flex-col items-center justify-center gap-4">
+        <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-gray-500 font-medium">Loading content...</p>
+      </div>
+
+      <!-- Error Banner -->
+      <div id="error-banner" class="hidden mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center justify-between">
+        <span id="error-message">Failed to connect to backend API.</span>
+        <button onclick="fetchStats()" class="text-xs underline hover:text-red-900 font-semibold">Retry</button>
+      </div>
+
+      <!-- ══════════════════════════════════
+           VIEW: DASHBOARD
+      ═══════════════════════════════════ -->
+      <section id="view-dashboard" class="space-y-8 max-w-5xl mx-auto">
+
+        <!-- Hero Banner -->
+        <div class="hero-gradient rounded-2xl border border-blue-100 p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div class="space-y-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white border border-blue-200 text-blue-600 shadow-sm">
+              ✨ Free Study Resource Library
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+              Explore Study Materials
+            </h2>
+            <p class="text-gray-500 text-sm max-w-lg">
+              Browse verified study notes across academic grades and test your knowledge with self-grading quizzes. All content is curated and read-only.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-3 shrink-0">
+            <button onclick="switchTab('library')" class="px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition shadow-md flex items-center gap-1.5" style="background: linear-gradient(135deg, #9333EA, #7C3AED);">
+              📚 Open Library
+            </button>
+            <button onclick="switchTab('notes')" class="px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition shadow-md" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">
+              Read Notes
+            </button>
+            <button onclick="switchTab('quizzes')" class="px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition shadow-md" style="background: linear-gradient(135deg, #4F46E5, #6366F1);">
+              Take Quizzes
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div class="stat-blue rounded-2xl p-5 text-white shadow-md">
+            <div class="text-xs uppercase tracking-wider font-semibold mb-2 opacity-80">📚 Library Grades</div>
+            <div id="stat-grades" class="text-4xl font-extrabold">4</div>
+            <div class="text-xs mt-2 opacity-70">Academic levels available</div>
+          </div>
+          <div class="stat-purple rounded-2xl p-5 text-white shadow-md">
+            <div class="text-xs uppercase tracking-wider font-semibold mb-2 opacity-80">📄 Total Notes</div>
+            <div id="stat-notes" class="text-4xl font-extrabold">-</div>
+            <div class="text-xs mt-2 opacity-70">Study notes to browse</div>
+          </div>
+          <div class="stat-indigo rounded-2xl p-5 text-white shadow-md">
+            <div class="text-xs uppercase tracking-wider font-semibold mb-2 opacity-80">🧠 Practice Quizzes</div>
+            <div id="stat-quizzes" class="text-4xl font-extrabold">-</div>
+            <div class="text-xs mt-2 opacity-70">Self-grading quizzes</div>
+          </div>
+        </div>
+
+        <!-- Quick Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="card-hover bg-white rounded-2xl border border-gray-200 p-6 shadow-sm cursor-pointer" onclick="switchTab('library')">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 bg-purple-50">📚</div>
+            <h3 class="font-bold text-gray-900 text-base mb-1">Academic Library</h3>
+            <p class="text-sm text-gray-500">4 academic grades, each with curated notes and self-grading quizzes.</p>
+            <div class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600">
+              Browse Library <span>→</span>
+            </div>
+          </div>
+          <div class="card-hover bg-white rounded-2xl border border-gray-200 p-6 shadow-sm cursor-pointer" onclick="switchTab('quizzes')">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 bg-blue-50">🧠</div>
+            <h3 class="font-bold text-gray-900 text-base mb-1">Practice Quizzes</h3>
+            <p class="text-sm text-gray-500">Select a quiz, answer questions, and receive instant grading with explanations.</p>
+            <div class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600">
+              Start a Quiz <span>→</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════
+           VIEW: LIBRARY
+      ═══════════════════════════════════ -->
+      <section id="view-library" class="hidden space-y-6 max-w-5xl mx-auto">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-gray-200">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold text-gray-900">Academic Library</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 border border-purple-200">4 Grades</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Browse each grade's curated note and take its self-grading quiz.</p>
+          </div>
+          <!-- Grade Selector Tabs -->
+          <div id="library-grade-tabs" class="flex flex-wrap items-center gap-2 bg-gray-100 p-1.5 rounded-xl border border-gray-200">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Active Grade View -->
+        <div id="library-grade-view" class="space-y-6">
+          <!-- Rendered by JavaScript -->
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════
+           VIEW: NOTES
+      ═══════════════════════════════════ -->
+      <section id="view-notes" class="hidden space-y-6 max-w-5xl mx-auto">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Study Notes Catalog</h2>
+            <p class="text-xs text-gray-500">Search and read curated subject summaries</p>
+          </div>
+          <input
+            type="text"
+            id="notes-search"
+            oninput="handleNotesSearch(this.value)"
+            placeholder="Search notes by topic or keyword..."
+            class="bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-72 shadow-sm"
+          />
+        </div>
+
+        <!-- Notes Grid -->
+        <div id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════
+           VIEW: QUIZZES
+      ═══════════════════════════════════ -->
+      <section id="view-quizzes" class="hidden space-y-6 max-w-3xl mx-auto">
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Self-Grading Quizzes</h2>
+            <p class="text-xs text-gray-500">Test your understanding with instant grading</p>
+          </div>
+          <select
+            id="quiz-select"
+            onchange="loadQuiz(this.value)"
+            class="bg-white border border-gray-300 text-sm text-gray-700 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+          >
+            <!-- Quizzes injected here -->
+          </select>
+        </div>
+
+        <!-- Active Quiz Questions -->
+        <div id="quiz-container" class="space-y-4">
+          <!-- Rendered by JS -->
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button
+            id="quiz-submit-btn"
+            onclick="submitActiveQuiz()"
+            class="px-6 py-3 rounded-xl text-white font-bold text-sm transition shadow-lg flex items-center gap-2"
+            style="background: linear-gradient(135deg, #059669, #10B981);"
+          >
+            🚀 Submit &amp; Grade Quiz
+          </button>
+        </div>
+
+        <!-- Quiz Results -->
+        <div id="quiz-results" class="hidden rounded-2xl bg-white border border-gray-200 p-6 shadow-sm space-y-4">
+          <!-- Results injected here -->
+        </div>
+      </section>
+
+    </main><!-- end main -->
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-4 px-6">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400 max-w-5xl mx-auto">
+        <span>StudyApp Portal &bull; Read-Only Mode</span>
+        <span id="footer-url-bottom" class="text-gray-400">API: <code class="bg-gray-100 px-2 py-0.5 rounded text-blue-600">Loading...</code></span>
+      </div>
+    </footer>
+
+  </div><!-- end main-content -->
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ════════════════════════════════════════════ -->
+  <script>
+    // ── Config ─────────────────────────────────────────────────────────────
+    let API_BASE = localStorage.getItem('studyapp_api_url') || (window.location.port ? window.location.origin : 'http://localhost:3001');
+
+    const PAGE_TITLES = {
+      dashboard: 'Dashboard',
+      library: 'Academic Library',
+      notes: 'Study Notes',
+      quizzes: 'Practice Quizzes',
+    };
+
+    // ── Sidebar mobile toggle ────────────────────────────────────────────
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebar-overlay').classList.add('open');
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+
+    // ── Footer URL display ───────────────────────────────────────────────
+    function updateFooterUrl() {
+      const topEl = document.getElementById('footer-api-url');
+      const botEl = document.getElementById('footer-url-bottom');
+      if (topEl) topEl.textContent = `API: ${API_BASE}`;
+      if (botEl) botEl.innerHTML = `API: <code class="bg-gray-100 px-2 py-0.5 rounded text-blue-600">${API_BASE}</code>`;
+    }
+
+    // ── API Settings modal ───────────────────────────────────────────────
+    function toggleApiSettings() {
+      const modal = document.getElementById('api-modal');
+      const input = document.getElementById('api-base-input');
+      input.value = API_BASE;
+      modal.classList.toggle('hidden');
+    }
+
+    function saveApiBase() {
+      const input = document.getElementById('api-base-input');
+      let val = input.value.trim();
+      if (!val) val = window.location.origin;
+      API_BASE = val.replace(/\/+$/, '');
+      localStorage.setItem('studyapp_api_url', API_BASE);
+      toggleApiSettings();
+      updateFooterUrl();
+      fetchStats();
+      fetchLibrary();
+      fetchNotes();
+      fetchQuizzes();
+    }
+
+    // ── Tab / View Switching ─────────────────────────────────────────────
+    function switchTab(tab) {
+      ['dashboard', 'library', 'notes', 'quizzes'].forEach((t) => {
+        const view   = document.getElementById(`view-${t}`);
+        const tabBtn = document.getElementById(`tab-${t}`);
+        if (!view || !tabBtn) return;
+        if (t === tab) {
+          view.classList.remove('hidden');
+          tabBtn.classList.add('active');
+          tabBtn.classList.remove('text-gray-600');
+        } else {
+          view.classList.add('hidden');
+          tabBtn.classList.remove('active');
+          tabBtn.classList.add('text-gray-600');
+        }
+      });
+      const titleEl = document.getElementById('page-title');
+      if (titleEl) titleEl.textContent = PAGE_TITLES[tab] || tab;
+      closeSidebar();
+    }
+
+    // ── Stats ──────────────────────────────────────────────────────────────
+    async function fetchStats() {
+      try {
+        const res = await fetch(`${API_BASE}/api/stats`);
+        if (!res.ok) throw new Error('API request failed');
+        const data = await res.json();
+        const statGrades = document.getElementById('stat-grades');
+        if (statGrades) statGrades.innerText = data.totalGrades ?? 4;
+        document.getElementById('stat-notes').innerText = data.totalNotes ?? 0;
+        document.getElementById('stat-quizzes').innerText = data.totalQuizzes ?? 0;
+        document.getElementById('error-banner').classList.add('hidden');
+      } catch (err) {
+        document.getElementById('error-banner').classList.remove('hidden');
+        document.getElementById('error-message').innerText = `Cannot reach backend at ${API_BASE}. Make sure the server is running.`;
+      }
+    }
+
+    // ── Library (4 Grades) ─────────────────────────────────────────────────
+    let libraryGrades = [];
+    let currentGradeId = 'grade-9';
+
+    async function fetchLibrary() {
+      try {
+        const res = await fetch(`${API_BASE}/api/library/grades`);
+        if (!res.ok) throw new Error('Failed to load library');
+        const data = await res.json();
+        libraryGrades = data.grades || [];
+        renderLibraryTabs();
+        if (libraryGrades.length > 0) renderGradeContent(currentGradeId);
+      } catch (err) {
+        console.error('Error fetching library:', err);
+      }
+    }
+
+    function renderLibraryTabs() {
+      const tabsContainer = document.getElementById('library-grade-tabs');
+      if (!tabsContainer) return;
+      tabsContainer.innerHTML = libraryGrades.map((g) => `
+        <button
+          onclick="selectGrade('${g.id}')"
+          id="btn-grade-${g.id}"
+          class="grade-tab-btn px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition ${
+            g.id === currentGradeId
+              ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
+              : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'
+          }"
+        >
+          🎓 ${g.displayName || g.name}
+        </button>
+      `).join('');
+    }
+
+    function selectGrade(gradeId) {
+      currentGradeId = gradeId;
+      renderLibraryTabs();
+      renderGradeContent(gradeId);
+    }
+
+    function renderGradeContent(gradeId) {
+      const grade = libraryGrades.find((g) => g.id === gradeId) || libraryGrades[0];
+      if (!grade) return;
+      const container = document.getElementById('library-grade-view');
+      const note = (grade.notes && grade.notes[0]) || null;
+      const quiz = (grade.quizzes && grade.quizzes[0]) || null;
+
+      container.innerHTML = `
+        <!-- Grade Banner -->
+        <div class="rounded-2xl hero-gradient border border-blue-100 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white text-purple-700 border border-purple-200 shadow-sm">
+                ${grade.displayName || grade.name}
+              </span>
+              <span class="text-xs text-gray-400">&bull; Level ${grade.level || grade.gradeNumber}</span>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900">${grade.name} Learning Hub</h3>
+            <p class="text-xs text-gray-500">${grade.description || 'Curated study materials for this academic level'}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            ${(grade.subjects || []).map((s) => `
+              <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-600 shadow-sm">${s}</span>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- 2-Column: Note + Quiz -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+          <!-- Note Column -->
+          <div class="rounded-2xl bg-white border border-gray-200 p-6 space-y-4 shadow-sm">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">📝</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Note for ${grade.name}</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                ${note ? note.subject : 'General'}
+              </span>
+            </div>
+            ${note ? `
+              <div class="space-y-3">
+                <h4 class="text-base font-bold text-gray-900">${note.title}</h4>
+                <p class="text-xs text-gray-500 italic bg-blue-50 p-3 rounded-xl border border-blue-100">
+                  💡 ${note.summary || 'Summary of key concepts'}
+                </p>
+                <div class="p-4 rounded-xl bg-gray-50 border border-gray-200 text-xs text-gray-700 leading-relaxed font-mono whitespace-pre-wrap max-h-64 overflow-y-auto">
+${note.content}
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                  <div class="flex flex-wrap gap-1">
+                    ${(note.tags || []).map((t) => `<span class="text-xs text-gray-400">#${t}</span>`).join(' ')}
+                  </div>
+                  <button
+                    onclick="openNoteModal('${grade.id}', '${note.id}')"
+                    class="px-4 py-2 rounded-xl text-xs font-bold text-white transition shadow-md flex items-center gap-1.5"
+                    style="background: linear-gradient(135deg, #2563EB, #1D4ED8);"
+                  >
+                    🔍 Read Full Note
+                  </button>
+                </div>
+              </div>
+            ` : `<p class="text-sm text-gray-400 py-8 text-center">No note available for this grade.</p>`}
+          </div>
+
+          <!-- Quiz Column -->
+          <div class="rounded-2xl bg-white border border-gray-200 p-6 space-y-4 shadow-sm">
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xl">❓</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-purple-600">Quiz for ${grade.name}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 uppercase">
+                  ${quiz ? quiz.difficulty : 'Medium'}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                  ${quiz && quiz.questions ? quiz.questions.length : 0} Qs
+                </span>
+              </div>
+            </div>
+            ${quiz ? `
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-base font-bold text-gray-900">${quiz.title}</h4>
+                  <p class="text-xs text-gray-400 mt-1">Select answers below and submit to receive instant grading.</p>
+                </div>
+                <form id="grade-quiz-form-${quiz.id}" onsubmit="event.preventDefault(); submitLibraryGradeQuiz('${grade.id}', '${quiz.id}');" class="space-y-3">
+                  ${(quiz.questions || []).map((q, idx) => `
+                    <div class="rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-2.5">
+                      <div class="font-semibold text-sm text-gray-900 flex items-start gap-1.5">
+                        <span class="text-purple-600 font-extrabold shrink-0">Q${idx + 1}.</span>
+                        <span>${q.question}</span>
+                      </div>
+                      <div class="space-y-1.5 pt-1">
+                        ${q.options.map((opt, optIdx) => `
+                          <label class="flex items-center gap-2.5 p-2.5 rounded-lg bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition text-xs text-gray-700">
+                            <input type="radio" name="gq_${quiz.id}_q_${q.id}" value="${optIdx}" class="text-blue-600 focus:ring-blue-500">
+                            <span>${opt}</span>
+                          </label>
+                        `).join('')}
+                      </div>
+                    </div>
+                  `).join('')}
+                  <div class="flex justify-end pt-1">
+                    <button type="submit" class="w-full sm:w-auto px-6 py-2.5 rounded-xl text-white font-bold text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-2" style="background: linear-gradient(135deg, #9333EA, #6366F1);">
+                      🚀 Submit &amp; Grade Quiz
+                    </button>
+                  </div>
+                </form>
+                <div id="grade-quiz-results-${quiz.id}" class="hidden rounded-xl bg-gray-50 border border-gray-200 p-4 space-y-3">
+                  <!-- Injected upon submission -->
+                </div>
+              </div>
+            ` : `<p class="text-sm text-gray-400 py-8 text-center">No quiz available for this grade.</p>`}
+          </div>
+
+        </div>
+      `;
+    }
+
+    async function submitLibraryGradeQuiz(gradeId, quizId) {
+      const grade = libraryGrades.find((g) => g.id === gradeId);
+      if (!grade) return;
+      const quiz = (grade.quizzes || []).find((q) => q.id === quizId);
+      if (!quiz) return;
+      const answers = {};
+      quiz.questions.forEach((q) => {
+        const checked = document.querySelector(`input[name="gq_${quiz.id}_q_${q.id}"]:checked`);
+        answers[q.id] = checked ? parseInt(checked.value) : -1;
+      });
+      try {
+        const res = await fetch(`${API_BASE}/api/library/grades/${gradeId}/quizzes/${quizId}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answers }),
+        });
+        const result = await res.json();
+        displayLibraryQuizResults(quizId, result);
+      } catch (err) {
+        alert('Failed to evaluate quiz.');
+      }
+    }
+
+    function displayLibraryQuizResults(quizId, result) {
+      const resContainer = document.getElementById(`grade-quiz-results-${quizId}`);
+      if (!resContainer) return;
+      resContainer.classList.remove('hidden');
+      const passBadge = result.passed
+        ? `<span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold uppercase">✓ Passed!</span>`
+        : `<span class="px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 text-xs font-bold uppercase">✗ Try Again</span>`;
+      resContainer.innerHTML = `
+        <div class="flex items-center justify-between border-b border-gray-200 pb-2.5">
+          <div>
+            <h5 class="text-sm font-bold text-gray-900">Score: ${result.score} / ${result.totalQuestions} (${result.percentage}%)</h5>
+            <p class="text-xs text-gray-400">${result.title}</p>
+          </div>
+          ${passBadge}
+        </div>
+        <div class="space-y-2 pt-1">
+          ${result.results.map((r) => `
+            <div class="p-2.5 rounded-lg text-xs ${r.isCorrect ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-red-50 border border-red-200 text-red-800'}">
+              <div class="font-semibold flex items-center gap-1.5">
+                <span>${r.isCorrect ? '✓' : '✗'}</span>
+                <span>${r.question}</span>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                Your Answer: <strong class="text-gray-700">${r.selectedOption}</strong>
+                ${!r.isCorrect ? `&bull; Correct: <strong class="text-emerald-700">${r.correctOption}</strong>` : ''}
+              </div>
+              ${r.explanation ? `<div class="text-xs text-gray-600 mt-1 bg-white/80 p-2 rounded border border-gray-100">💡 ${r.explanation}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      resContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ── Note Modal ─────────────────────────────────────────────────────────
+    let activeModalNoteText = '';
+
+    function openNoteModal(gradeId, noteId) {
+      const grade = libraryGrades.find((g) => g.id === gradeId);
+      if (!grade) return;
+      const note = (grade.notes || []).find((n) => n.id === noteId);
+      if (!note) return;
+      activeModalNoteText = `${note.title}\nSubject: ${note.subject}\n\n${note.content}`;
+      document.getElementById('note-modal-grade').innerText = grade.displayName || grade.name;
+      document.getElementById('note-modal-subject').innerText = note.subject;
+      document.getElementById('note-modal-title').innerText = note.title;
+      document.getElementById('note-modal-content').innerText = note.content;
+      document.getElementById('copy-note-btn').innerText = '📋 Copy Note';
+      document.getElementById('note-modal').classList.remove('hidden');
+    }
+
+    function closeNoteModal() {
+      document.getElementById('note-modal').classList.add('hidden');
+    }
+
+    function copyNoteContent() {
+      navigator.clipboard.writeText(activeModalNoteText).then(() => {
+        const btn = document.getElementById('copy-note-btn');
+        btn.innerText = '✓ Copied!';
+        setTimeout(() => { btn.innerText = '📋 Copy Note'; }, 2000);
+      });
+    }
+
+    // ── Notes ──────────────────────────────────────────────────────────────
+    let allNotes = [];
+
+    async function fetchNotes() {
+      try {
+        const res = await fetch(`${API_BASE}/api/notes`);
+        const data = await res.json();
+        allNotes = data.notes || [];
+        renderNotes(allNotes);
+      } catch (err) {
+        console.error('Error fetching notes:', err);
+      }
+    }
+
+    function renderNotes(notes) {
+      const grid = document.getElementById('notes-grid');
+      if (notes.length === 0) {
+        grid.innerHTML = `<div class="col-span-2 text-center py-12 text-gray-400">No notes found.</div>`;
+        return;
+      }
+      grid.innerHTML = notes.map((note) => `
+        <div class="card-hover rounded-2xl bg-white border border-gray-200 p-5 shadow-sm flex flex-col justify-between">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
+                ${note.subject || 'General'}
+              </span>
+              <span class="text-xs text-gray-400">🔒 Read-Only</span>
+            </div>
+            <h3 class="font-bold text-gray-900 text-base">${note.title}</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">${note.content}</p>
+          </div>
+          ${note.tags && note.tags.length > 0 ? `
+            <div class="mt-4 pt-3 border-t border-gray-100 flex flex-wrap gap-1.5">
+              ${note.tags.map((t) => `<span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">#${t}</span>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function handleNotesSearch(term) {
+      const filtered = allNotes.filter(
+        (n) =>
+          n.title.toLowerCase().includes(term.toLowerCase()) ||
+          n.content.toLowerCase().includes(term.toLowerCase()) ||
+          (n.tags && n.tags.some((t) => t.toLowerCase().includes(term.toLowerCase())))
+      );
+      renderNotes(filtered);
+    }
+
+    // ── Quizzes ────────────────────────────────────────────────────────────
+    let activeQuiz = null;
+
+    async function fetchQuizzes() {
+      try {
+        const res = await fetch(`${API_BASE}/api/quizzes`);
+        const data = await res.json();
+        const select = document.getElementById('quiz-select');
+        select.innerHTML = (data.quizzes || [])
+          .map((q) => `<option value="${q.id}">${q.title} (${q.questionCount} Qs)</option>`)
+          .join('');
+        if (data.quizzes && data.quizzes.length > 0) loadQuiz(data.quizzes[0].id);
+      } catch (err) {
+        console.error('Error fetching quizzes:', err);
+      }
+    }
+
+    async function loadQuiz(quizId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/quizzes/${quizId}?mode=take`);
+        activeQuiz = await res.json();
+        renderQuizQuestions(activeQuiz);
+        document.getElementById('quiz-results').classList.add('hidden');
+      } catch (err) {
+        console.error('Error loading quiz:', err);
+      }
+    }
+
+    function renderQuizQuestions(quiz) {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = (quiz.questions || []).map((q, idx) => `
+        <div class="rounded-2xl bg-white border border-gray-200 p-5 space-y-3 shadow-sm">
+          <div class="font-bold text-gray-900 text-base">
+            <span class="text-blue-600 font-extrabold mr-1">Q${idx + 1}.</span> ${q.question}
+          </div>
+          <div class="space-y-2">
+            ${q.options.map((opt, optIdx) => `
+              <label class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition">
+                <input type="radio" name="question_${q.id}" value="${optIdx}" class="text-blue-600 focus:ring-blue-500">
+                <span class="text-sm text-gray-700">${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function submitActiveQuiz() {
+      if (!activeQuiz) return;
+      const answers = {};
+      activeQuiz.questions.forEach((q) => {
+        const checked = document.querySelector(`input[name="question_${q.id}"]:checked`);
+        answers[q.id] = checked ? parseInt(checked.value) : -1;
+      });
+      try {
+        const res = await fetch(`${API_BASE}/api/quizzes/${activeQuiz.id}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ answers }),
+        });
+        const result = await res.json();
+        displayQuizResults(result);
+      } catch (err) {
+        alert('Failed to evaluate quiz.');
+      }
+    }
+
+    function displayQuizResults(result) {
+      const resCard = document.getElementById('quiz-results');
+      resCard.classList.remove('hidden');
+      const passBadge = result.passed
+        ? `<span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold">✓ Passed!</span>`
+        : `<span class="px-3 py-1 rounded-full bg-red-100 text-red-700 border border-red-200 text-xs font-bold">✗ Try Again</span>`;
+      resCard.innerHTML = `
+        <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Quiz Results: ${result.title}</h3>
+            <p class="text-xs text-gray-500 mt-0.5">Score: <strong class="text-gray-800">${result.score}</strong> / ${result.totalQuestions} (${result.percentage}%)</p>
+          </div>
+          ${passBadge}
+        </div>
+        <div class="space-y-3">
+          ${result.results.map((r) => `
+            <div class="p-3 rounded-xl ${r.isCorrect ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}">
+              <div class="flex items-center gap-2 font-semibold text-sm ${r.isCorrect ? 'text-emerald-700' : 'text-red-700'}">
+                <span>${r.isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+                <span class="text-gray-600 font-normal">&bull; ${r.question}</span>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                Your Answer: <strong class="text-gray-700">${r.selectedOption}</strong> | Correct: <strong class="text-emerald-700">${r.correctOption}</strong>
+              </div>
+              ${r.explanation ? `<div class="text-xs text-gray-500 mt-1 bg-white/80 p-2 rounded border border-gray-100">💡 ${r.explanation}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      resCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ── Init ───────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      updateFooterUrl();
+      fetchStats();
+      fetchLibrary();
+      fetchNotes();
+      fetchQuizzes();
+
+      // On md+ screens, keep sidebar always visible (no transform)
+      function handleResize() {
+        const sidebar = document.getElementById('sidebar');
+        if (window.innerWidth >= 768) {
+          sidebar.classList.remove('open');
+          document.getElementById('sidebar-overlay').classList.remove('open');
+        }
+      }
+      window.addEventListener('resize', handleResize);
+    });
+  </script>
+</body>
+</html>

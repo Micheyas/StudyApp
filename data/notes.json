@@ -1,0 +1,74 @@
+[
+  {
+    "id": "note-1",
+    "title": "Introduction to Data Structures",
+    "subject": "Computer Science",
+    "grade": null,
+    "gradeLevel": null,
+    "tags": [
+      "algorithms",
+      "basics"
+    ],
+    "content": "Arrays store elements in contiguous memory. Linked lists store elements with pointers.",
+    "createdAt": "2026-11-01T07:25:59.055Z",
+    "updatedAt": "2026-11-01T07:25:59.321Z"
+  },
+  {
+    "id": "note-2",
+    "title": "Photosynthesis Overview",
+    "subject": "Biology",
+    "grade": null,
+    "gradeLevel": null,
+    "tags": [
+      "botany",
+      "energy"
+    ],
+    "content": "Plants convert sunlight, carbon dioxide, and water into glucose and oxygen.",
+    "createdAt": "2026-11-01T07:25:59.321Z",
+    "updatedAt": "2026-11-01T07:25:59.321Z"
+  },
+  {
+    "id": "note-g9-1",
+    "title": "Cell Theory and Organelles",
+    "subject": "Biology",
+    "grade": 9,
+    "gradeLevel": 1,
+    "tags": ["cells", "biology", "organelles", "grade9", "library"],
+    "summary": "Core principles of cell theory and essential eukaryotic cell structures.",
+    "content": "All living organisms are composed of one or more cells. The cell is the basic structural and functional unit of life. Key organelles include:\n- Nucleus: Houses genetic material (DNA) and directs cellular activity.\n- Mitochondria: The 'powerhouse' that produces ATP through aerobic cellular respiration.\n- Ribosomes: Sites of protein synthesis, found free in cytoplasm or on the rough ER.\n- Chloroplasts: Unique to plant cells; carry out photosynthesis using chlorophyll.\n- Cell Wall: Rigid outer boundary in plant and fungal cells for structural protection.\n- Plasma Membrane: Phospholipid bilayer selectively controlling what enters and exits the cell.",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "note-g10-1",
+    "title": "Chemical Bonding and Reaction Kinetics",
+    "subject": "Chemistry",
+    "grade": 10,
+    "gradeLevel": 2,
+    "tags": ["chemistry", "bonding", "reactions", "grade10", "library"],
+    "summary": "Ionic vs covalent bonds, reaction rates, and energy profiles.",
+    "content": "Chemical bonds form when atoms achieve stable valence electron configurations (octet rule):\n- Ionic Bonding: Complete transfer of electrons from metals to nonmetals, creating oppositely charged ions held by electrostatic attraction (e.g. NaCl).\n- Covalent Bonding: Sharing of electron pairs between nonmetal atoms (e.g. H2O, CO2).\n- Metallic Bonding: Positive metal cations surrounded by a sea of delocalized electrons.\n- Conservation of Mass: Atoms are neither created nor destroyed; chemical equations must be balanced on both sides.\n- Exothermic vs Endothermic: Exothermic releases heat (Delta H < 0), while endothermic absorbs heat (Delta H > 0).",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "note-g11-1",
+    "title": "Chapter 1: Relations and Functions",
+    "subject": "Mathematics",
+    "grade": 11,
+    "gradeLevel": 3,
+    "tags": ["mathematics", "functions", "relations", "algebra", "grade11", "library"],
+    "summary": "Relations, functions, domain, range, injective, surjective, and bijective mappings.",
+    "content": "A relation R from set A to set B is a subset of the Cartesian product A x B.\n\n1. Definition of a Function:\n   A relation f is a function if every element x in domain A is mapped to exactly one element y in codomain B.\n   - Vertical Line Test: If every vertical line intersects a graph at most once, the graph represents a function.\n\n2. Classification of Functions:\n   - One-to-One (Injective): Distinct domain elements produce distinct outputs: f(a) = f(b) implies a = b.\n   - Onto (Surjective): Every element in the codomain has at least one pre-image in the domain: Range(f) = Codomain(f).\n   - Bijective: A function that is both injective and surjective. Only bijective functions possess a unique inverse function f^-1(x).\n\n3. Composition of Functions:\n   Given f: B -> C and g: A -> B, the composite (f o g)(x) = f(g(x)) with domain {x in Dom(g) | g(x) in Dom(f)}.",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  },
+  {
+    "id": "note-g12-1",
+    "title": "Electromagnetism and Electromagnetic Induction",
+    "subject": "Physics",
+    "grade": 12,
+    "gradeLevel": 4,
+    "tags": ["physics", "electromagnetism", "induction", "grade12", "library"],
+    "summary": "Faraday's Law, Lenz's Law, magnetic flux, and transformer equations.",
+    "content": "Electromagnetic induction describes how changing magnetic environments produce electric voltages.\n\n1. Magnetic Flux (Phi):\n   Phi = B * A * cos(theta), measured in Webers (Wb).\n\n2. Faraday's Law of Induction:\n   The induced electromotive force (EMF) in any closed loop equals the negative rate of change of magnetic flux through the loop:\n   EMF = -N * (dPhi / dt)\n\n3. Lenz's Law:\n   The polarity of the induced EMF generates a current whose magnetic field opposes the original change in flux (represented by the negative sign in Faraday's law).\n\n4. Mutual & Self Induction:\n   L = N * (Phi / I), measured in Henries (H). Energy stored in an inductor's magnetic field is E = 0.5 * L * I^2.\n\n5. Transformers:\n   Vp / Vs = Np / Ns = Is / Ip.",
+    "createdAt": "2026-11-01T08:00:00.000Z"
+  }
+]

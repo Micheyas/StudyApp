@@ -1,7 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const Anthropic = require('@anthropic-ai/sdk');
+const path = require('path');
+
+const notesRouter = require('./routes/notes');
+const quizzesRouter = require('./routes/quizzes');
+const libraryRouter = require('./routes/library');
+const db = require('./db/storage');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,181 +17,70 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ── Anthropic client ──────────────────────────────────────────────────────────
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// ── Static Web Frontend ───────────────────────────────────────────────────────
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    readOnly: true,
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// ── AI Chat  ──────────────────────────────────────────────────────────────────
-// POST /api/chat
-// Body: { messages: [{role, content}], context?: string }
-app.post('/api/chat', async (req, res) => {
-  try {
-    const { messages, context } = req.body;
+// ── API Overview & Stats ──────────────────────────────────────────────────────
+app.get('/api/stats', (req, res) => {
+  const notes = db.read('notes');
+  const quizzes = db.read('quizzes');
+  const library = db.read('library');
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'messages array is required' });
-    }
+  const uniqueSubjects = new Set([
+    ...notes.map((n) => n.subject),
+    ...quizzes.map((q) => q.topic),
+  ]);
 
-    // Build system prompt with optional study context
-    const systemPrompt = context
-      ? `You are an expert study assistant. The student is currently studying the following material:\n\n${context}\n\nAnswer questions clearly and helpfully. Break down complex topics, give examples, and encourage the student.`
-      : `You are an expert study assistant. Answer questions clearly and helpfully. Break down complex topics, give examples, and encourage the student.`;
-
-    const response = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages,
-    });
-
-    res.json({
-      role: 'assistant',
-      content: response.content[0].text,
-      usage: response.usage,
-    });
-  } catch (error) {
-    console.error('Chat error:', error.message);
-    res.status(500).json({ error: 'Failed to get AI response', details: error.message });
-  }
+  res.json({
+    readOnly: true,
+    totalGrades: library.length,
+    totalNotes: notes.length,
+    totalQuizzes: quizzes.length,
+    subjectsCount: uniqueSubjects.size,
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// ── AI Streaming Chat ─────────────────────────────────────────────────────────
-// POST /api/chat/stream
-// Body: { messages: [{role, content}], context?: string }
-// Returns: Server-Sent Events stream
-app.post('/api/chat/stream', async (req, res) => {
-  try {
-    const { messages, context } = req.body;
+// ── Resource Routes (Read-Only) ───────────────────────────────────────────────
+app.use('/api/library', libraryRouter);
+app.use('/api/notes', notesRouter);
+app.use('/api/quizzes', quizzesRouter);
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'messages array is required' });
-    }
-
-    const systemPrompt = context
-      ? `You are an expert study assistant. The student is currently studying the following material:\n\n${context}\n\nAnswer questions clearly and helpfully. Break down complex topics, give examples, and encourage the student.`
-      : `You are an expert study assistant. Answer questions clearly and helpfully. Break down complex topics, give examples, and encourage the student.`;
-
-    // Set SSE headers
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    const stream = anthropic.messages.stream({
-      model: 'claude-opus-4-5',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages,
-    });
-
-    stream.on('text', (text) => {
-      res.write(`data: ${JSON.stringify({ type: 'text', text })}\n\n`);
-    });
-
-    stream.on('message', (message) => {
-      res.write(`data: ${JSON.stringify({ type: 'done', usage: message.usage })}\n\n`);
-      res.end();
-    });
-
-    stream.on('error', (error) => {
-      console.error('Stream error:', error.message);
-      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\n\n`);
-      res.end();
-    });
-  } catch (error) {
-    console.error('Streaming setup error:', error.message);
-    res.status(500).json({ error: 'Failed to start stream', details: error.message });
+// Fallback to index.html for frontend routing
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
   }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ── Generate Quiz ─────────────────────────────────────────────────────────────
-// POST /api/quiz/generate
-// Body: { topic: string, numQuestions?: number, difficulty?: 'easy'|'medium'|'hard' }
-app.post('/api/quiz/generate', async (req, res) => {
-  try {
-    const { topic, numQuestions = 5, difficulty = 'medium' } = req.body;
-
-    if (!topic) {
-      return res.status(400).json({ error: 'topic is required' });
-    }
-
-    const prompt = `Generate ${numQuestions} multiple-choice quiz questions about "${topic}" at ${difficulty} difficulty.
-
-Return ONLY a valid JSON array in this exact format, no other text:
-[
-  {
-    "id": 1,
-    "question": "Question text here?",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "correctIndex": 0,
-    "explanation": "Brief explanation of why this is correct."
-  }
-]
-
-correctIndex is the 0-based index of the correct option in the options array.`;
-
-    const response = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const rawText = response.content[0].text.trim();
-
-    // Extract JSON from the response (handle markdown code blocks)
-    const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      return res.status(500).json({ error: 'Failed to parse quiz JSON from AI response' });
-    }
-
-    const questions = JSON.parse(jsonMatch[0]);
-    res.json({ questions, topic, difficulty });
-  } catch (error) {
-    console.error('Quiz generation error:', error.message);
-    res.status(500).json({ error: 'Failed to generate quiz', details: error.message });
-  }
+// ── 404 Handler for API ───────────────────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
-// ── Summarize Text ────────────────────────────────────────────────────────────
-// POST /api/summarize
-// Body: { text: string, style?: 'brief'|'detailed'|'bullet-points' }
-app.post('/api/summarize', async (req, res) => {
-  try {
-    const { text, style = 'bullet-points' } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ error: 'text is required' });
-    }
-
-    const styleInstructions = {
-      brief: 'Write a concise 2-3 sentence summary.',
-      detailed: 'Write a detailed paragraph summary covering all key points.',
-      'bullet-points': 'Write a summary as a clear bullet-point list of the key ideas.',
-    };
-
-    const prompt = `${styleInstructions[style] || styleInstructions['bullet-points']}\n\nText to summarize:\n\n${text}`;
-
-    const response = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 512,
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    res.json({ summary: response.content[0].text });
-  } catch (error) {
-    console.error('Summarize error:', error.message);
-    res.status(500).json({ error: 'Failed to summarize text', details: error.message });
-  }
+// ── Global Error Handler ──────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('Unhandled server error:', err.stack);
+  res.status(500).json({ error: 'Internal server error', details: err.message });
 });
 
 // ── Start server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🚀 StudyApp server running on http://localhost:${PORT}`);
-  console.log(`   Health check: http://localhost:${PORT}/health`);
-  console.log(`   API key set: ${process.env.ANTHROPIC_API_KEY ? '✓' : '✗ (missing!)'}\n`);
+  console.log(`\n🔒 StudyApp Portal & API running on http://localhost:${PORT}`);
+  console.log(`   Web App:         http://localhost:${PORT}`);
+  console.log(`   Health check:    http://localhost:${PORT}/health`);
+  console.log(`   Overview & Stats: http://localhost:${PORT}/api/stats`);
+  console.log(`   Library API:     http://localhost:${PORT}/api/library (4 grades with Notes & Quizzes)`);
+  console.log(`   Notes API:       http://localhost:${PORT}/api/notes (read-only)`);
+  console.log(`   Quizzes API:     http://localhost:${PORT}/api/quizzes (read-only)\n`);
 });

@@ -1,0 +1,230 @@
+[
+  {
+    "id": "grade-9",
+    "gradeNumber": 9,
+    "level": 1,
+    "name": "Grade 9",
+    "displayName": "Grade 9 (Level 1)",
+    "aliases": ["1", "grade-1", "g1", "9", "grade-9", "g9"],
+    "description": "Secondary Education - Grade 9 Foundations",
+    "subjects": ["Biology", "Physics", "Mathematics", "English"],
+    "notes": [
+      {
+        "id": "note-g9-1",
+        "title": "Cell Theory and Organelles",
+        "subject": "Biology",
+        "grade": 9,
+        "gradeLevel": 1,
+        "tags": ["cells", "biology", "organelles", "grade9"],
+        "summary": "Core principles of cell theory and essential eukaryotic cell structures.",
+        "content": "All living organisms are composed of one or more cells. The cell is the basic structural and functional unit of life. Key organelles include:\n- Nucleus: Houses genetic material (DNA) and directs cellular activity.\n- Mitochondria: The 'powerhouse' that produces ATP through aerobic cellular respiration.\n- Ribosomes: Sites of protein synthesis, found free in cytoplasm or on the rough ER.\n- Chloroplasts: Unique to plant cells; carry out photosynthesis using chlorophyll.\n- Cell Wall: Rigid outer boundary in plant and fungal cells for structural protection.\n- Plasma Membrane: Phospholipid bilayer selectively controlling what enters and exits the cell.",
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ],
+    "quizzes": [
+      {
+        "id": "quiz-g9-1",
+        "title": "Grade 9 Biology: Cell Structure Quiz",
+        "topic": "Biology",
+        "grade": 9,
+        "gradeLevel": 1,
+        "difficulty": "medium",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Which organelle is known as the powerhouse of the cell?",
+            "options": ["Ribosome", "Mitochondria", "Nucleus", "Endoplasmic Reticulum"],
+            "correctIndex": 1,
+            "explanation": "Mitochondria generate most of the cell's ATP chemical energy through cellular respiration."
+          },
+          {
+            "id": 2,
+            "question": "Which structure is found in plant cells but NOT in animal cells?",
+            "options": ["Cell Wall", "Plasma Membrane", "Mitochondria", "Ribosome"],
+            "correctIndex": 0,
+            "explanation": "Plant cells have a cellulose cell wall outside the membrane for rigidity, which animal cells lack."
+          },
+          {
+            "id": 3,
+            "question": "What is the primary function of ribosomes in a cell?",
+            "options": ["Lipid synthesis", "Protein synthesis", "DNA storage", "Waste digestion"],
+            "correctIndex": 1,
+            "explanation": "Ribosomes translate mRNA transcripts to assemble amino acids into polypeptide chains (proteins)."
+          }
+        ],
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "grade-10",
+    "gradeNumber": 10,
+    "level": 2,
+    "name": "Grade 10",
+    "displayName": "Grade 10 (Level 2)",
+    "aliases": ["2", "grade-2", "g2", "10", "grade-10", "g10"],
+    "description": "Secondary Education - Grade 10 Core Science & Mathematics",
+    "subjects": ["Chemistry", "Physics", "Mathematics"],
+    "notes": [
+      {
+        "id": "note-g10-1",
+        "title": "Chemical Bonding and Reaction Kinetics",
+        "subject": "Chemistry",
+        "grade": 10,
+        "gradeLevel": 2,
+        "tags": ["chemistry", "bonding", "reactions", "grade10"],
+        "summary": "Ionic vs covalent bonds, reaction rates, and energy profiles.",
+        "content": "Chemical bonds form when atoms achieve stable valence electron configurations (octet rule):\n- Ionic Bonding: Complete transfer of electrons from metals to nonmetals, creating oppositely charged ions held by electrostatic attraction (e.g. NaCl).\n- Covalent Bonding: Sharing of electron pairs between nonmetal atoms (e.g. H2O, CO2).\n- Metallic Bonding: Positive metal cations surrounded by a sea of delocalized electrons.\n- Conservation of Mass: Atoms are neither created nor destroyed; chemical equations must be balanced on both sides.\n- Exothermic vs Endothermic: Exothermic releases heat (Delta H < 0), while endothermic absorbs heat (Delta H > 0).",
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ],
+    "quizzes": [
+      {
+        "id": "quiz-g10-1",
+        "title": "Grade 10 Chemistry: Bonding & Reactions Quiz",
+        "topic": "Chemistry",
+        "grade": 10,
+        "gradeLevel": 2,
+        "difficulty": "medium",
+        "questions": [
+          {
+            "id": 1,
+            "question": "What type of bond forms when electrons are transferred from one atom to another?",
+            "options": ["Covalent bond", "Ionic bond", "Metallic bond", "Hydrogen bond"],
+            "correctIndex": 1,
+            "explanation": "Ionic bonds are formed through the electrostatic attraction between oppositely charged ions after electron transfer."
+          },
+          {
+            "id": 2,
+            "question": "In an exothermic reaction, what happens to thermal energy?",
+            "options": ["Heat is released to surroundings", "Heat is absorbed from surroundings", "Temperature of surroundings drops", "Total energy is destroyed"],
+            "correctIndex": 0,
+            "explanation": "Exothermic reactions release energy into the surroundings, causing the surrounding temperature to rise."
+          },
+          {
+            "id": 3,
+            "question": "What is the pH of a neutral aqueous solution at 25°C?",
+            "options": ["0", "14", "7", "1"],
+            "correctIndex": 2,
+            "explanation": "A pH of 7 indicates neutrality at 25°C, where [H+] = [OH-] = 1.0 x 10^-7 M."
+          }
+        ],
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "grade-11",
+    "gradeNumber": 11,
+    "level": 3,
+    "name": "Grade 11",
+    "displayName": "Grade 11 (Level 3)",
+    "aliases": ["3", "grade-3", "g3", "11", "grade-11", "g11"],
+    "description": "Preparatory Education - Grade 11 Advanced Studies",
+    "subjects": ["Mathematics", "Economics", "Physics"],
+    "notes": [
+      {
+        "id": "note-g11-1",
+        "title": "Chapter 1: Relations and Functions",
+        "subject": "Mathematics",
+        "grade": 11,
+        "gradeLevel": 3,
+        "tags": ["mathematics", "functions", "relations", "algebra", "grade11"],
+        "summary": "Relations, functions, domain, range, injective, surjective, and bijective mappings.",
+        "content": "A relation R from set A to set B is a subset of the Cartesian product A x B.\n\n1. Definition of a Function:\n   A relation f is a function if every element x in domain A is mapped to exactly one element y in codomain B.\n   - Vertical Line Test: If every vertical line intersects a graph at most once, the graph represents a function.\n\n2. Classification of Functions:\n   - One-to-One (Injective): Distinct domain elements produce distinct outputs: f(a) = f(b) implies a = b.\n   - Onto (Surjective): Every element in the codomain has at least one pre-image in the domain: Range(f) = Codomain(f).\n   - Bijective: A function that is both injective and surjective. Only bijective functions possess a unique inverse function f^-1(x).\n\n3. Composition of Functions:\n   Given f: B -> C and g: A -> B, the composite (f o g)(x) = f(g(x)) with domain {x in Dom(g) | g(x) in Dom(f)}.",
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ],
+    "quizzes": [
+      {
+        "id": "quiz-g11-1",
+        "title": "Grade 11 Mathematics: Relations & Functions Quiz",
+        "topic": "Mathematics",
+        "grade": 11,
+        "gradeLevel": 3,
+        "difficulty": "hard",
+        "questions": [
+          {
+            "id": 1,
+            "question": "Which graphical test determines if a given graph is a function?",
+            "options": ["Horizontal Line Test", "Vertical Line Test", "Diagonal Line Test", "Symmetry Test"],
+            "correctIndex": 1,
+            "explanation": "The Vertical Line Test confirms that for each input x there is at most one corresponding output y."
+          },
+          {
+            "id": 2,
+            "question": "If f(x) = 2x + 3, what is its inverse function f^-1(x)?",
+            "options": ["(x - 3) / 2", "(x + 3) / 2", "2x - 3", "1 / (2x + 3)"],
+            "correctIndex": 0,
+            "explanation": "Set y = 2x + 3 => 2x = y - 3 => x = (y - 3) / 2. Therefore, f^-1(x) = (x - 3) / 2."
+          },
+          {
+            "id": 3,
+            "question": "A function that is simultaneously injective (one-to-one) and surjective (onto) is called:",
+            "options": ["Polynomial", "Bijective", "Asymptotic", "Constant"],
+            "correctIndex": 1,
+            "explanation": "A bijection is both one-to-one and onto, meaning every element in the target set has exactly one unique pre-image."
+          }
+        ],
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "grade-12",
+    "gradeNumber": 12,
+    "level": 4,
+    "name": "Grade 12",
+    "displayName": "Grade 12 (Level 4)",
+    "aliases": ["4", "grade-4", "g4", "12", "grade-12", "g12"],
+    "description": "Preparatory Education - Grade 12 College Entrance Preparation",
+    "subjects": ["Physics", "Chemistry", "Economics"],
+    "notes": [
+      {
+        "id": "note-g12-1",
+        "title": "Electromagnetism and Electromagnetic Induction",
+        "subject": "Physics",
+        "grade": 12,
+        "gradeLevel": 4,
+        "tags": ["physics", "electromagnetism", "induction", "grade12"],
+        "summary": "Faraday's Law, Lenz's Law, magnetic flux, and transformer equations.",
+        "content": "Electromagnetic induction describes how changing magnetic environments produce electric voltages.\n\n1. Magnetic Flux (Phi):\n   Phi = B * A * cos(theta), measured in Webers (Wb).\n\n2. Faraday's Law of Induction:\n   The induced electromotive force (EMF) in any closed loop equals the negative rate of change of magnetic flux through the loop:\n   EMF = -N * (dPhi / dt)\n\n3. Lenz's Law:\n   The polarity of the induced EMF generates a current whose magnetic field opposes the original change in flux (represented by the negative sign in Faraday's law).\n\n4. Mutual & Self Induction:\n   L = N * (Phi / I), measured in Henries (H). Energy stored in an inductor's magnetic field is E = 0.5 * L * I^2.\n\n5. Transformers:\n   Vp / Vs = Np / Ns = Is / Ip.",
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ],
+    "quizzes": [
+      {
+        "id": "quiz-g12-1",
+        "title": "Grade 12 Physics: Electromagnetism Quiz",
+        "topic": "Physics",
+        "grade": 12,
+        "gradeLevel": 4,
+        "difficulty": "hard",
+        "questions": [
+          {
+            "id": 1,
+            "question": "According to Faraday's law, the magnitude of induced EMF is proportional to:",
+            "options": ["The rate of change of magnetic flux", "The wire resistance only", "The constant electrostatic field", "The mass of the conductor"],
+            "correctIndex": 0,
+            "explanation": "Faraday's law states EMF = -dPhi/dt; induced EMF is directly proportional to how fast the magnetic flux changes."
+          },
+          {
+            "id": 2,
+            "question": "Which law states that induced current opposes the change in magnetic flux that produced it?",
+            "options": ["Ampere's Law", "Lenz's Law", "Coulomb's Law", "Gauss's Law"],
+            "correctIndex": 1,
+            "explanation": "Lenz's law provides the physical direction of induced current, consistent with the conservation of energy."
+          },
+          {
+            "id": 3,
+            "question": "What is the SI unit of magnetic flux?",
+            "options": ["Tesla (T)", "Weber (Wb)", "Henry (H)", "Volt (V)"],
+            "correctIndex": 1,
+            "explanation": "Magnetic flux is measured in Webers (Wb), where 1 Wb = 1 Tesla * m^2."
+          }
+        ],
+        "createdAt": "2026-11-01T08:00:00.000Z"
+      }
+    ]
+  }
+]
