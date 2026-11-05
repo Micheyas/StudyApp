@@ -1,5 +1,5 @@
 // StudyApp Service Worker - Versioned Cache & Auto-Update Controller
-const CACHE_NAME = 'studyapp-cache-v1.0.0';
+const CACHE_NAME = 'studyapp-cache-v1.1.0';
 
 const PRECACHE_ASSETS = [
   '/',
