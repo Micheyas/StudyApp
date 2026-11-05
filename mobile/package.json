@@ -23,7 +23,8 @@
     "react-native": "0.76.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2"
+    "@babel/core": "^7.25.2",
+    "@expo/ngrok": "^4.1.0"
   },
   "private": true
 }
