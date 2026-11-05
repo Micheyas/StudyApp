@@ -16,6 +16,12 @@
     },
     "android": {
       "package": "com.micheyas.studyapp"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "51ab6bc0-20eb-41b6-b167-4d1864eb7e56"
+      }
+    },
+    "owner": "mikiyas32"
   }
 }
