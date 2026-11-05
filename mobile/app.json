@@ -16,14 +16,6 @@
     },
     "android": {
       "package": "com.micheyas.studyapp"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/studyapp",
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 0
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -52,13 +52,13 @@ export default function SettingsScreen() {
     }
   }
 
-  // ── In-App OTA Self-Update ──────────────────────────────────────────
+  // â”€â”€ In-App OTA Self-Update â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleCheckForUpdate() {
     try {
       setCheckingUpdate(true);
       setUpdateStatus('Checking server for updates...');
 
-      if (__DEV__) {
+      if (__DEV__ || !Updates.isEnabled) {
         setUpdateStatus('App is running in development mode. In-app updates activate in production builds.');
         return;
       }
@@ -70,7 +70,7 @@ export default function SettingsScreen() {
         setUpdateStatus('Update downloaded! Reloading app...');
         await Updates.reloadAsync();
       } else {
-        setUpdateStatus('✓ App is already running the latest version!');
+        setUpdateStatus('âœ“ App is already running the latest version!');
       }
     } catch (err) {
       setUpdateStatus(`Update check: ${err.message || 'Up to date'}`);
@@ -79,7 +79,7 @@ export default function SettingsScreen() {
     }
   }
 
-  // ── Offline Pre-Cache Sync ──────────────────────────────────────────
+  // â”€â”€ Offline Pre-Cache Sync â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function handleOfflineSync() {
     try {
       setSyncingOffline(true);
@@ -104,7 +104,7 @@ export default function SettingsScreen() {
       <View style={styles.card}>
         <View style={styles.profileRow}>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarEmoji}>{user?.isGuest ? '👤' : '🎓'}</Text>
+            <Text style={styles.avatarEmoji}>{user?.isGuest ? 'ðŸ‘¤' : 'ðŸŽ“'}</Text>
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.userName}>{user?.name || 'Student'}</Text>
@@ -183,7 +183,7 @@ export default function SettingsScreen() {
         {syncResult ? (
           <View style={styles.syncBox}>
             <Text style={styles.syncText}>
-              ✓ Cached: {syncResult.gradesCount} Grades, {syncResult.notesCount} Notes, {syncResult.quizzesCount} Quizzes
+              âœ“ Cached: {syncResult.gradesCount} Grades, {syncResult.notesCount} Notes, {syncResult.quizzesCount} Quizzes
             </Text>
           </View>
         ) : null}
