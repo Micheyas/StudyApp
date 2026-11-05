@@ -6,8 +6,8 @@ const STORAGE_KEY_CACHE_LIBRARY = 'studyapp_cache_library';
 const STORAGE_KEY_CACHE_NOTES = 'studyapp_cache_notes';
 const STORAGE_KEY_CACHE_QUIZZES = 'studyapp_cache_quizzes';
 
-// Default host: Android emulator uses 10.0.2.2, iOS simulator uses localhost
-const DEFAULT_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
+// Production live cloud backend for all users worldwide
+const DEFAULT_URL = 'https://studyapp-f6r3.onrender.com';
 
 export async function getApiBaseUrl() {
   try {
