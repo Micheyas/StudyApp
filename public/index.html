@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyApp - Study Portal</title>
+  <title>StudyApp - Academic Library</title>
+  
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="StudyApp" />
+  <link rel="apple-touch-icon" href="/icons/icon.svg" />
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -78,8 +88,61 @@
     }
     #sidebar-overlay.open { display: block; }
   </style>
+  <link rel="manifest" href="/manifest.json">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-gray-50 text-gray-900 flex min-h-screen">
+
+  <!-- ═══════════════════════════════════════════
+       GOOGLE AUTHENTICATION OVERLAY
+  ════════════════════════════════════════════ -->
+  <div id="auth-overlay" class="fixed inset-0 bg-gray-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-3xl p-7 sm:p-8 shadow-2xl border border-gray-200 text-center space-y-5">
+      
+      <div class="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg" style="background: linear-gradient(135deg, #2563EB, #9333EA);">
+        📖
+      </div>
+
+      <div class="space-y-1.5">
+        <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Welcome to StudyApp</h2>
+        <p class="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
+          Sign in with your Google account to access curated academic notes and practice quizzes.
+        </p>
+        <div class="pt-1">
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full">
+            🔒 Read-Only Student Access &bull; No Admin
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center justify-center pt-2 space-y-3">
+        <!-- Google GSI Sign-In Button Container -->
+        <div id="g_id_signin" class="flex justify-center min-h-[44px]"></div>
+
+        <div id="google-client-missing-note" class="hidden text-xs text-amber-700 bg-amber-50 border border-amber-200 p-3 rounded-xl max-w-sm text-left space-y-1">
+          <p class="font-semibold flex items-center gap-1"><span>⚠️</span> Google Client ID Not Set</p>
+          <p class="text-2xs text-gray-500">Add your Google OAuth Client ID in Settings (or <code>.env</code>). You can also click below to continue in Demo Mode.</p>
+        </div>
+
+        <div class="relative w-full flex items-center justify-center py-1">
+          <div class="border-t border-gray-200 w-full"></div>
+          <span class="bg-white px-3 text-xs text-gray-400 absolute font-medium">or</span>
+        </div>
+
+        <!-- Continue as Guest / Demo Mode -->
+        <button onclick="loginAsGuest()" class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition shadow-sm">
+          <span>👤</span> Continue as Guest (Demo Mode)
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-2xs text-gray-400">
+        <span>Curated Study Materials</span>
+        <button onclick="toggleApiSettings()" class="text-blue-600 hover:underline font-semibold">Configure Client ID</button>
+      </div>
+
+    </div>
+  </div>
+
 
   <!-- Mobile Sidebar Overlay -->
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -138,18 +201,32 @@
       </button>
     </nav>
 
-    <!-- Bottom: API Settings -->
-    <div class="px-3 pb-5 pt-2 border-t border-gray-100">
+    
+    <!-- User Profile & Sign Out -->
+    <div class="px-3 pb-4 pt-2 border-t border-gray-100 space-y-2">
+      <div id="user-profile-sidebar" class="hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+        <div class="flex items-center gap-2.5">
+          <img id="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=studyapp" alt="Avatar" class="w-8 h-8 rounded-full border border-gray-300 object-cover shrink-0" />
+          <div class="flex-1 min-w-0 text-left">
+            <p id="user-name" class="text-xs font-bold text-gray-900 truncate">Student</p>
+            <p id="user-email" class="text-2xs text-gray-500 truncate">student@gmail.com</p>
+          </div>
+        </div>
+        <button onclick="signOut()" class="mt-2 w-full text-center text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 py-1.5 rounded-lg transition border border-rose-200/60">
+          Sign Out
+        </button>
+      </div>
+
       <button onclick="toggleApiSettings()"
-        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
-        API Settings
+        Settings &amp; Auth
       </button>
     </div>
-  </aside>
+</aside>
 
   <!-- ═══════════════════════════════════════════
        MAIN CONTENT AREA
@@ -170,13 +247,74 @@
         <h2 id="page-title" class="text-base font-bold text-gray-900">Dashboard</h2>
       </div>
 
-      <!-- Right: API url indicator -->
+      
+      <!-- Right: User & Status -->
       <div class="flex items-center gap-3">
+        <div id="header-user-pill" class="hidden items-center gap-2 px-2.5 py-1 rounded-full bg-gray-100 border border-gray-200 text-xs">
+          <img id="header-user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=studyapp" class="w-5 h-5 rounded-full object-cover" />
+          <span id="header-user-name" class="font-medium text-gray-700 max-w-[120px] truncate"></span>
+        </div>
         <span id="footer-api-url" class="hidden sm:block text-xs text-gray-400"></span>
-        <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/60"></div>
-        <span class="text-xs font-medium text-emerald-600">Live</span>
+        <div class="flex items-center gap-1.5">
+          <div class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/60"></div>
+          <span class="text-xs font-medium text-emerald-600">Live</span>
+        </div>
       </div>
-    </header>
+</header>
+
+    <!-- ── In-App Update Available Floating Banner ── -->
+    <div id="update-toast" class="hidden fixed bottom-6 right-6 z-50 max-w-sm bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-4 rounded-2xl shadow-2xl border border-indigo-500/40 flex items-center gap-4 transition-all duration-300">
+      <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-xl shrink-0">
+        ✨
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-bold text-white">Update Available!</div>
+        <p id="update-toast-msg" class="text-xs text-indigo-200 truncate">New notes or quizzes were added.</p>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button onclick="handleManualUpdate()"
+          class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold text-xs shadow-md transition cursor-pointer">
+          Update
+        </button>
+        <button onclick="dismissUpdateToast()" class="p-1 rounded-lg text-slate-400 hover:text-white transition text-xs cursor-pointer">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Toast Feedback Notification (Updating... / Updated!) ── -->
+    <div id="status-toast" class="hidden fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 text-xs font-semibold flex items-center gap-2 transition-all duration-300">
+      <span id="status-toast-icon">✓</span>
+      <span id="status-toast-text">Updated!</span>
+    </div>
+
+    <!-- ── iOS Installation Guide Modal ── -->
+    <div id="ios-install-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-gray-200 text-center space-y-4">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-100 flex items-center justify-center text-2xl shadow-inner">
+          📲
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Install on iPhone / iPad</h3>
+          <p class="text-xs text-gray-500 mt-1">
+            No App Store required! Follow these 2 quick steps:
+          </p>
+        </div>
+        <div class="space-y-2 text-left bg-gray-50 p-3.5 rounded-2xl border border-gray-200 text-xs text-gray-700">
+          <div class="flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-2xs">1</span>
+            <span>Tap the <strong>Share</strong> button (square with arrow up ⎋) at the bottom of Safari.</span>
+          </div>
+          <div class="flex items-start gap-2.5">
+            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center shrink-0 text-2xs">2</span>
+            <span>Scroll down and tap <strong>Add to Home Screen</strong> (⊞).</span>
+          </div>
+        </div>
+        <button onclick="closeIosInstallModal()" class="w-full py-2.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold text-xs transition cursor-pointer">
+          Got it
+        </button>
+      </div>
+    </div>
 
     <!-- ── API Settings Modal ── -->
     <div id="api-modal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -194,6 +332,17 @@
           placeholder="http://localhost:3001"
           class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-5"
         />
+        
+        <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+          Google OAuth Client ID
+        </label>
+        <input
+          type="text"
+          id="google-client-id-input"
+          placeholder="your-client-id.apps.googleusercontent.com"
+          class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-5"
+        />
+
         <div class="flex justify-end gap-3">
           <button onclick="toggleApiSettings()" class="px-4 py-2 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-100 transition">
             Cancel
@@ -452,7 +601,157 @@
     }
 
     // ── API Settings modal ───────────────────────────────────────────────
+    
+    // ── Google Authentication & User State ───────────────────────────────
+    let currentUser = null;
+    let GOOGLE_CLIENT_ID = localStorage.getItem('studyapp_google_client_id') || '';
+
+    async function fetchAuthConfig() {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/config`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.googleClientId && !localStorage.getItem('studyapp_google_client_id')) {
+            GOOGLE_CLIENT_ID = data.googleClientId;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not fetch auth config:', e);
+      }
+    }
+
+    function initGoogleSignIn() {
+      const container = document.getElementById('g_id_signin');
+      const missingNote = document.getElementById('google-client-missing-note');
+      
+      const isPlaceholder = !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes('your-google-client-id');
+      if (isPlaceholder) {
+        if (missingNote) missingNote.classList.remove('hidden');
+        if (container) container.innerHTML = '';
+        return;
+      }
+      if (missingNote) missingNote.classList.add('hidden');
+
+      if (window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+        });
+        if (container) {
+          container.innerHTML = '';
+          google.accounts.id.renderButton(container, {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard',
+            shape: 'pill',
+            text: 'signin_with',
+            logo_alignment: 'left',
+            width: 280,
+          });
+        }
+      } else {
+        setTimeout(initGoogleSignIn, 500);
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      if (payload) {
+        const user = {
+          name: payload.name || payload.email.split('@')[0],
+          email: payload.email,
+          picture: payload.picture || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + encodeURIComponent(payload.email),
+          isGuest: false,
+          signedInAt: new Date().toISOString(),
+        };
+        saveUserSession(user);
+      }
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function loginAsGuest() {
+      const user = {
+        name: 'Guest Student',
+        email: 'student@studyapp.local',
+        picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=studyapp-guest',
+        isGuest: true,
+        signedInAt: new Date().toISOString(),
+      };
+      saveUserSession(user);
+    }
+
+    function saveUserSession(user) {
+      currentUser = user;
+      localStorage.setItem('studyapp_user', JSON.stringify(user));
+      applyAuthState();
+    }
+
+    function signOut() {
+      currentUser = null;
+      localStorage.removeItem('studyapp_user');
+      if (window.google && google.accounts && google.accounts.id) {
+        try { google.accounts.id.disableAutoSelect(); } catch(e){}
+      }
+      applyAuthState();
+      initGoogleSignIn();
+    }
+
+    function applyAuthState() {
+      const stored = localStorage.getItem('studyapp_user');
+      if (stored) {
+        try { currentUser = JSON.parse(stored); } catch (e) { currentUser = null; }
+      }
+
+      const overlay = document.getElementById('auth-overlay');
+      const userSidebar = document.getElementById('user-profile-sidebar');
+      const userHeaderPill = document.getElementById('header-user-pill');
+
+      if (currentUser) {
+        if (overlay) overlay.classList.add('hidden');
+        if (userSidebar) userSidebar.classList.remove('hidden');
+        if (userHeaderPill) {
+          userHeaderPill.classList.remove('hidden');
+          userHeaderPill.classList.add('flex');
+        }
+
+        const nameEl = document.getElementById('user-name');
+        const emailEl = document.getElementById('user-email');
+        const avatarEl = document.getElementById('user-avatar');
+        if (nameEl) nameEl.textContent = currentUser.name + (currentUser.isGuest ? ' (Demo)' : '');
+        if (emailEl) emailEl.textContent = currentUser.email;
+        if (avatarEl) avatarEl.src = currentUser.picture;
+
+        const headerName = document.getElementById('header-user-name');
+        const headerAvatar = document.getElementById('header-user-avatar');
+        if (headerName) headerName.textContent = currentUser.name;
+        if (headerAvatar) headerAvatar.src = currentUser.picture;
+      } else {
+        if (overlay) overlay.classList.remove('hidden');
+        if (userSidebar) userSidebar.classList.add('hidden');
+        if (userHeaderPill) {
+          userHeaderPill.classList.add('hidden');
+          userHeaderPill.classList.remove('flex');
+        }
+      }
+    }
+
     function toggleApiSettings() {
+      const gInput = document.getElementById("google-client-id-input");
+      if (gInput) gInput.value = GOOGLE_CLIENT_ID || "";
+
       const modal = document.getElementById('api-modal');
       const input = document.getElementById('api-base-input');
       input.value = API_BASE;
@@ -460,6 +759,13 @@
     }
 
     function saveApiBase() {
+      const gInput = document.getElementById('google-client-id-input');
+      if (gInput) {
+        GOOGLE_CLIENT_ID = gInput.value.trim();
+        localStorage.setItem('studyapp_google_client_id', GOOGLE_CLIENT_ID);
+        initGoogleSignIn();
+      }
+
       const input = document.getElementById('api-base-input');
       let val = input.value.trim();
       if (!val) val = window.location.origin;
@@ -467,10 +773,24 @@
       localStorage.setItem('studyapp_api_url', API_BASE);
       toggleApiSettings();
       updateFooterUrl();
+      applyAuthState();
+      fetchAuthConfig().then(() => { initGoogleSignIn(); });
       fetchStats();
       fetchLibrary();
       fetchNotes();
       fetchQuizzes();
+
+      // Initialize PWA Service Worker & Live Update checker
+      initServiceWorker();
+      checkForServerUpdates(true);
+
+      // Background check every 45 seconds
+      setInterval(() => checkForServerUpdates(true), 45000);
+
+      // Check for updates when user returns to app tab
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) checkForServerUpdates(true);
+      });
     }
 
     // ── Tab / View Switching ─────────────────────────────────────────────
@@ -908,6 +1228,206 @@ ${note.content}
         </div>
       `;
       resCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ── Live In-App Update & PWA Controller ────────────────────────────────
+    let lastContentHash = localStorage.getItem('studyapp_content_hash') || null;
+    let isUpdating = false;
+    let deferredInstallPrompt = null;
+    let waitingServiceWorker = null;
+
+    // Register Service Worker
+    function initServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          if (reg.waiting) {
+            waitingServiceWorker = reg.waiting;
+            notifyUpdateAvailable('App update ready');
+          }
+
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  waitingServiceWorker = newWorker;
+                  notifyUpdateAvailable('New version downloaded');
+                }
+              });
+            }
+          });
+        }).catch((err) => console.log('SW registration error:', err));
+
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+          }
+        });
+      }
+    }
+
+    // Capture PWA beforeinstallprompt for 1-tap install button
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const installBtn = document.getElementById('install-app-btn');
+      if (installBtn) installBtn.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const installBtn = document.getElementById('install-app-btn');
+      if (installBtn) installBtn.classList.add('hidden');
+      showStatusToast('✓ StudyApp installed successfully!', 'success');
+    });
+
+    function triggerPWAInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choiceResult) => {
+          deferredInstallPrompt = null;
+        });
+      } else {
+        // iOS or already installed or unsupported
+        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        if (isIos) {
+          const modal = document.getElementById('ios-install-modal');
+          if (modal) modal.classList.remove('hidden');
+        } else {
+          showStatusToast('To install: open menu (⋮) and tap "Install App" or "Add to Home Screen"', 'info');
+        }
+      }
+    }
+
+    function closeIosInstallModal() {
+      const modal = document.getElementById('ios-install-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function dismissUpdateToast() {
+      const toast = document.getElementById('update-toast');
+      if (toast) toast.classList.add('hidden');
+    }
+
+    function showStatusToast(message, type = 'info') {
+      const toast = document.getElementById('status-toast');
+      const text = document.getElementById('status-toast-text');
+      const icon = document.getElementById('status-toast-icon');
+      if (!toast) return;
+
+      text.innerText = message;
+      if (type === 'success') {
+        icon.innerText = '✓';
+        toast.className = 'fixed top-20 right-6 z-50 bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-xl border border-emerald-500 text-xs font-semibold flex items-center gap-2 transition-all duration-300';
+      } else if (type === 'error') {
+        icon.innerText = '✕';
+        toast.className = 'fixed top-20 right-6 z-50 bg-rose-600 text-white px-4 py-2.5 rounded-xl shadow-xl border border-rose-500 text-xs font-semibold flex items-center gap-2 transition-all duration-300';
+      } else {
+        icon.innerText = 'ℹ';
+        toast.className = 'fixed top-20 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700 text-xs font-semibold flex items-center gap-2 transition-all duration-300';
+      }
+
+      toast.classList.remove('hidden');
+      clearTimeout(window.__statusToastTimeout);
+      window.__statusToastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    function notifyUpdateAvailable(message) {
+      const badge = document.getElementById('update-badge');
+      const btn = document.getElementById('btn-app-update');
+      const label = document.getElementById('update-label');
+      const toast = document.getElementById('update-toast');
+      const toastMsg = document.getElementById('update-toast-msg');
+
+      if (badge) badge.classList.remove('hidden');
+      if (btn) {
+        btn.classList.add('ring-2', 'ring-amber-400', 'bg-amber-50', 'text-amber-800');
+      }
+      if (label) label.innerText = 'Update Available!';
+      if (toast) {
+        if (toastMsg && message) toastMsg.innerText = message;
+        toast.classList.remove('hidden');
+      }
+    }
+
+    // Silent background check for updates from server
+    async function checkForServerUpdates(silent = true) {
+      try {
+        const res = await fetch(`${API_BASE}/api/version?_t=${Date.now()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (!lastContentHash) {
+          lastContentHash = data.contentHash;
+          localStorage.setItem('studyapp_content_hash', data.contentHash);
+          return;
+        }
+
+        if (data.contentHash !== lastContentHash) {
+          notifyUpdateAvailable(`New materials added (${data.totalNotes} notes, ${data.totalQuizzes} quizzes)`);
+        } else if (!silent) {
+          showStatusToast('✓ You have the latest version', 'success');
+        }
+      } catch (err) {
+        if (!silent) showStatusToast('Could not reach server', 'error');
+      }
+    }
+
+    // Manual update button clicked by user
+    async function handleManualUpdate() {
+      if (isUpdating) return;
+      isUpdating = true;
+
+      const icon = document.getElementById('update-icon');
+      const label = document.getElementById('update-label');
+      const badge = document.getElementById('update-badge');
+      const btn = document.getElementById('btn-app-update');
+      const toast = document.getElementById('update-toast');
+
+      if (icon) icon.classList.add('animate-spin');
+      if (label) label.innerText = 'Updating...';
+      showStatusToast('Checking and updating content...', 'info');
+
+      try {
+        const [verRes] = await Promise.all([
+          fetch(`${API_BASE}/api/version?_t=${Date.now()}`),
+          fetchStats(),
+          fetchLibrary(),
+          fetchNotes(),
+          fetchQuizzes(),
+        ]);
+
+        if (verRes && verRes.ok) {
+          const verData = await verRes.json();
+          lastContentHash = verData.contentHash;
+          localStorage.setItem('studyapp_content_hash', verData.contentHash);
+        }
+
+        if (waitingServiceWorker) {
+          waitingServiceWorker.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        if (badge) badge.classList.add('hidden');
+        if (btn) {
+          btn.classList.remove('ring-2', 'ring-amber-400', 'bg-amber-50', 'text-amber-800');
+        }
+        if (label) label.innerText = 'Update';
+        if (toast) toast.classList.add('hidden');
+
+        showStatusToast('✓ Successfully updated to latest version!', 'success');
+      } catch (err) {
+        console.error('Update error:', err);
+        showStatusToast('Failed to update. Check connection.', 'error');
+      } finally {
+        setTimeout(() => {
+          if (icon) icon.classList.remove('animate-spin');
+          isUpdating = false;
+        }, 600);
+      }
     }
 
     // ── Init ───────────────────────────────────────────────────────────────

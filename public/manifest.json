@@ -1,0 +1,19 @@
+{
+  "name": "StudyApp - Academic Library",
+  "short_name": "StudyApp",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "description": "Curated academic notes and self-grading quizzes across high school grades with zero app-store dependency.",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

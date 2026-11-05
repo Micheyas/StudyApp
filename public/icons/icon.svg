@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="50%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#3730a3" />
+    </linearGradient>
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#eef2ff" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1e1b4b" flood-opacity="0.35" />
+    </filter>
+  </defs>
+  
+  <!-- Rounded App Background -->
+  <rect width="512" height="512" rx="115" fill="url(#grad)" />
+  
+  <g transform="translate(64, 72)" filter="url(#shadow)">
+    <!-- Graduation Cap Top -->
+    <path d="M 192,30 L 356,102 L 192,174 L 28,102 Z" fill="#ffffff" />
+    <!-- Tassel -->
+    <path d="M 192,174 L 192,216 Q 192,260 264,272" stroke="#c7d2fe" stroke-width="10" fill="none" stroke-linecap="round" />
+    <circle cx="264" cy="272" r="14" fill="#fbbf24" />
+    <!-- Cap Skull Cap Rim -->
+    <path d="M 72,125 L 72,192 Q 192,250 312,192 L 312,125" fill="none" stroke="#e0e7ff" stroke-width="14" stroke-linecap="round" />
+    
+    <!-- Open Book Base -->
+    <g transform="translate(0, 150)">
+      <!-- Pages Backing (3D effect) -->
+      <path d="M 48,94 C 110,72 165,88 192,112 C 219,88 274,72 336,94 L 336,224 C 274,202 219,218 192,242 C 165,218 110,202 48,224 Z" fill="#c7d2fe" opacity="0.6" />
+      
+      <!-- Main Open Pages -->
+      <path d="M 48,84 C 110,62 165,78 192,102 C 219,78 274,62 336,84 L 336,214 C 274,192 219,208 192,232 C 165,208 110,192 48,214 Z" fill="url(#bookGrad)" />
+      
+      <!-- Book Center Spine -->
+      <path d="M 192,102 L 192,232" stroke="#6366f1" stroke-width="8" stroke-linecap="round" />
+      
+      <!-- Left Page: "Study" -->
+      <text x="120" y="148" font-family="'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" fill="#312e81" text-anchor="middle" letter-spacing="1">Study</text>
+      <line x1="72" y1="168" x2="168" y2="168" stroke="#818cf8" stroke-width="5" stroke-linecap="round" />
+      <line x1="84" y1="184" x2="156" y2="184" stroke="#a5b4fc" stroke-width="4" stroke-linecap="round" />
+      
+      <!-- Right Page: "App" -->
+      <text x="264" y="148" font-family="'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="30" fill="#4338ca" text-anchor="middle" letter-spacing="1">App</text>
+      <line x1="216" y1="168" x2="312" y2="168" stroke="#818cf8" stroke-width="5" stroke-linecap="round" />
+      <line x1="228" y1="184" x2="300" y2="184" stroke="#a5b4fc" stroke-width="4" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>

@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const notesRouter = require('./routes/notes');
 const quizzesRouter = require('./routes/quizzes');
@@ -21,6 +22,13 @@ app.use(express.json());
 
 // ── Static Web Frontend ───────────────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ── Auth Config (Google Client ID) ────────────────────────────────────────────
+app.get('/api/auth/config', (req, res) => {
+  res.json({
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+  });
+});
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -48,6 +56,37 @@ app.get('/api/stats', (req, res) => {
     totalNotes: notes.length,
     totalQuizzes: quizzes.length,
     subjectsCount: uniqueSubjects.size,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ── Version & Change Detection Endpoint ───────────────────────────────────────
+app.get('/api/version', (req, res) => {
+  const notes = db.read('notes');
+  const quizzes = db.read('quizzes');
+  const library = db.read('library');
+
+  let latestMtime = 0;
+  const DATA_DIR = path.join(__dirname, 'data');
+  ['notes.json', 'quizzes.json', 'library.json'].forEach((file) => {
+    try {
+      const p = path.join(DATA_DIR, file);
+      if (fs.existsSync(p)) {
+        const stat = fs.statSync(p);
+        if (stat.mtimeMs > latestMtime) latestMtime = stat.mtimeMs;
+      }
+    } catch (_) {}
+  });
+
+  const contentHash = `v1-${Math.floor(latestMtime)}-n${notes.length}-q${quizzes.length}-g${library.length}`;
+
+  res.json({
+    version: '1.1.0',
+    contentHash,
+    lastModified: new Date(latestMtime || Date.now()).toISOString(),
+    totalNotes: notes.length,
+    totalQuizzes: quizzes.length,
+    totalGrades: library.length,
     timestamp: new Date().toISOString(),
   });
 });
