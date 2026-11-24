@@ -19,6 +19,39 @@ import NotesScreen from './src/screens/NotesScreen';
 import QuizzesScreen from './src/screens/QuizzesScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('StudyApp Caught Error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaView style={styles.errorContainer}>
+          <Text style={{ fontSize: 44, marginBottom: 12 }}>⚠️</Text>
+          <Text style={styles.errorTitle}>StudyApp Notice</Text>
+          <Text style={styles.errorDetail}>
+            {this.state.error?.message || String(this.state.error)}
+          </Text>
+          <TouchableOpacity
+            style={styles.retryBtn}
+            onPress={() => this.setState({ hasError: false, error: null })}
+          >
+            <Text style={styles.retryBtnText}>Reload App</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function MainApp() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('library');
@@ -146,9 +179,11 @@ function MainApp() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -272,5 +307,36 @@ const styles = StyleSheet.create({
   tabLabelActive: {
     color: '#2563EB',
     fontWeight: '700',
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  errorDetail: {
+    fontSize: 13,
+    color: '#DC2626',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  retryBtn: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

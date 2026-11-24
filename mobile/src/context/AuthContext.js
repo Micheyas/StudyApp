@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import { Alert } from 'react-native';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -15,11 +16,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [googleClientId, setGoogleClientId] = useState('');
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: googleClientId || undefined,
-    iosClientId: googleClientId || undefined,
-    webClientId: googleClientId || undefined,
-  });
+  const [request, response, promptAsync] = Google.useAuthRequest(
+    googleClientId
+      ? {
+          androidClientId: googleClientId,
+          iosClientId: googleClientId,
+          webClientId: googleClientId,
+        }
+      : {}
+  );
 
   useEffect(() => {
     loadStoredSession();
@@ -74,6 +79,13 @@ export function AuthProvider({ children }) {
   }
 
   async function signInWithGoogle() {
+    if (!googleClientId) {
+      Alert.alert(
+        'Google Auth Setup',
+        'Google Client ID is not configured yet. You can sign in immediately using "Continue as Guest (Demo Mode)"!'
+      );
+      return;
+    }
     if (promptAsync) {
       return promptAsync();
     }

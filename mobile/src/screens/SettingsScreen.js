@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Updates from 'expo-updates';
+// Updates disabled in direct APK build
 import { useAuth } from '../context/AuthContext';
 import { getApiBaseUrl, setApiBaseUrl, syncAllContentForOffline } from '../api/client';
 
@@ -58,17 +58,17 @@ export default function SettingsScreen() {
       setCheckingUpdate(true);
       setUpdateStatus('Checking server for updates...');
 
-      if (__DEV__ || !Updates.isEnabled) {
+      if (__DEV__ || !false) {
         setUpdateStatus('App is running in development mode. In-app updates activate in production builds.');
         return;
       }
 
-      const update = await Updates.checkForUpdateAsync();
+      const update = await Promise.resolve({ isAvailable: false });
       if (update.isAvailable) {
         setUpdateStatus('Downloading new update...');
-        await Updates.fetchUpdateAsync();
+        await Promise.resolve();
         setUpdateStatus('Update downloaded! Reloading app...');
-        await Updates.reloadAsync();
+        await Promise.resolve();
       } else {
         setUpdateStatus('âœ“ App is already running the latest version!');
       }

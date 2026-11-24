@@ -4,8 +4,9 @@
     "slug": "studyapp",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "studyapp",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
@@ -16,6 +17,9 @@
     },
     "android": {
       "package": "com.micheyas.studyapp"
+    },
+    "updates": {
+      "enabled": false
     },
     "extra": {
       "eas": {
