@@ -8,6 +8,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 const STORAGE_KEY_USER = 'studyapp_mobile_user';
 const STORAGE_KEY_GOOGLE_CLIENT_ID = 'studyapp_google_client_id_mobile';
+const FALLBACK_CLIENT_ID = 'studyapp-client-placeholder.apps.googleusercontent.com';
 
 const AuthContext = createContext(null);
 
@@ -16,28 +17,27 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [googleClientId, setGoogleClientId] = useState('');
 
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    googleClientId
-      ? {
-          androidClientId: googleClientId,
-          iosClientId: googleClientId,
-          webClientId: googleClientId,
-        }
-      : {}
-  );
+  // Fallback placeholder ensures useAuthRequest hook never throws on Android when unconfigured
+  const effectiveClientId = googleClientId || FALLBACK_CLIENT_ID;
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: effectiveClientId,
+    iosClientId: effectiveClientId,
+    webClientId: effectiveClientId,
+  });
 
   useEffect(() => {
     loadStoredSession();
   }, []);
 
   useEffect(() => {
-    if (response?.type === 'success') {
+    if (response?.type === 'success' && googleClientId) {
       const { authentication } = response;
       if (authentication?.accessToken) {
         fetchGoogleUserProfile(authentication.accessToken);
       }
     }
-  }, [response]);
+  }, [response, googleClientId]);
 
   async function loadStoredSession() {
     try {
@@ -81,8 +81,8 @@ export function AuthProvider({ children }) {
   async function signInWithGoogle() {
     if (!googleClientId) {
       Alert.alert(
-        'Google Auth Setup',
-        'Google Client ID is not configured yet. You can sign in immediately using "Continue as Guest (Demo Mode)"!'
+        'Google Sign-In Setup',
+        'Google Client ID is not configured yet. Tap "Continue as Student (Instant Access)" below to start studying immediately!'
       );
       return;
     }
@@ -93,9 +93,9 @@ export function AuthProvider({ children }) {
 
   async function signInAsGuest() {
     const guestUser = {
-      name: 'Student Guest',
+      name: 'Student',
       email: 'student@studyapp.local',
-      picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=guest-student',
+      picture: 'https://api.dicebear.com/7.x/bottts/svg?seed=student-user',
       isGuest: true,
       signedInAt: new Date().toISOString(),
     };

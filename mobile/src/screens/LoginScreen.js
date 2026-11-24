@@ -25,11 +25,11 @@ export default function LoginScreen() {
             <Text style={styles.bookEmoji}>📖</Text>
           </View>
           <Text style={styles.appTitle}>StudyApp</Text>
-          <Text style={styles.appSubtitle}>Mobile Academic Library &amp; Quiz Hub</Text>
+          <Text style={styles.appSubtitle}>Mobile Academic Library & Quiz Hub</Text>
           
           <View style={styles.badge}>
-            <Ionicons name="lock-closed" size={12} color="#059669" />
-            <Text style={styles.badgeText}>Read-Only Student Access • No Admin</Text>
+            <Ionicons name="school" size={12} color="#059669" />
+            <Text style={styles.badgeText}>Student Portal • Grades 9–12</Text>
           </View>
         </View>
 
@@ -48,13 +48,30 @@ export default function LoginScreen() {
             <Text style={styles.featureText}>Offline-First: Study without Internet</Text>
           </View>
           <View style={styles.featureItem}>
-            <Ionicons name="sync-outline" size={20} color="#4F46E5" />
-            <Text style={styles.featureText}>In-App OTA Self-Updates</Text>
+            <Ionicons name="phone-portrait-outline" size={20} color="#4F46E5" />
+            <Text style={styles.featureText}>Standalone Native Android App</Text>
           </View>
         </View>
 
         {/* Sign In Options */}
         <View style={styles.authActions}>
+          {/* Primary Instant Student Login */}
+          <TouchableOpacity
+            style={styles.guestBtn}
+            activeOpacity={0.85}
+            onPress={signInAsGuest}
+          >
+            <Ionicons name="arrow-forward-circle" size={20} color="#FFFFFF" />
+            <Text style={styles.guestBtnText}>Continue as Student (Instant Access)</Text>
+          </TouchableOpacity>
+
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Secondary Google Login */}
           <TouchableOpacity
             style={styles.googleBtn}
             activeOpacity={0.85}
@@ -63,34 +80,10 @@ export default function LoginScreen() {
             <Ionicons name="logo-google" size={18} color="#EA4335" />
             <Text style={styles.googleBtnText}>Sign In with Google</Text>
           </TouchableOpacity>
-
-          {!isConfigured && (
-            <View style={styles.noticeBox}>
-              <Ionicons name="information-circle-outline" size={16} color="#B45309" />
-              <Text style={styles.noticeText}>
-                Google Client ID is optional for testing. You can tap below to continue in Demo Guest Mode right away.
-              </Text>
-            </View>
-          )}
-
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity
-            style={styles.guestBtn}
-            activeOpacity={0.85}
-            onPress={signInAsGuest}
-          >
-            <Ionicons name="person-outline" size={18} color="#374151" />
-            <Text style={styles.guestBtnText}>Continue as Guest (Demo Mode)</Text>
-          </TouchableOpacity>
         </View>
 
         <Text style={styles.footerNote}>
-          All students have standard read-only access.
+          Free, read-only educational library. No registration required.
         </Text>
 
       </ScrollView>
@@ -187,6 +180,25 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 12,
   },
+  guestBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#2563EB',
+    paddingVertical: 15,
+    borderRadius: 14,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  guestBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
   googleBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -197,45 +209,11 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     paddingVertical: 14,
     borderRadius: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
   },
   googleBtnText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1E293B',
-  },
-  guestBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: '#F1F5F9',
-    paddingVertical: 14,
-    borderRadius: 14,
-  },
-  guestBtnText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#334155',
-  },
-  noticeBox: {
-    flexDirection: 'row',
-    gap: 8,
-    backgroundColor: '#FFFBEB',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    borderRadius: 12,
-    padding: 10,
-  },
-  noticeText: {
-    fontSize: 11,
-    color: '#92400E',
-    flex: 1,
-    lineHeight: 16,
   },
   dividerRow: {
     flexDirection: 'row',
